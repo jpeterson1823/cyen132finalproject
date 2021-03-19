@@ -1,6 +1,11 @@
 from tkinter import *
 import socket, subprocess
 
+# Used to switch between the client and host netcode
+global MACHINE
+MACHINE = 'HOST'
+#MACHINE = 'CLIENT'
+
 # Host will go first
 global myTurn
 myTurn = False
@@ -192,19 +197,18 @@ class ShipFrame(Frame):
 
 class Game:
     def __init__(self, window):
-        self.machine = 'Determined in Netcode Setup'
+        global MACHINE
         self.shotFrame = ShotFrame(window, self)
         self.shipFrame = ShipFrame(window)
         
-        #self.socket, self.connection, self.client_addr = self.setupHostNetcode()
-        self.socket = self.setupClientNetcode()
+        if MACHINE == "HOST":
+            self.socket, self.connection, self.client_addr = self.setupHostNetcode()
+        else:
+            self.socket = self.setupClientNetcode()
         self.startGameLoop(window)
     
 
     def setupHostNetcode(self):
-        # set the machine to host
-        self.machine = 'HOST'
-
         # get current IPv4
         print("Getting current IPv4...", end=' ')
         SERVER_IP = self.getLocalIP()
@@ -227,9 +231,6 @@ class Game:
 
     
     def setupClientNetcode(self):
-        # set the machine to client
-        self.machine = "CLIENT"
-
         # Ask for input of host IPv4
         SERVER_IP = input("Please enter the IPv4 of host machine: ")
         # Confirm the provided IPv4
@@ -254,9 +255,9 @@ class Game:
 
     # Sends the location of the cell to shoot to the other machine    
     def sendMove(self, coord):
-        global myTurn, turnShotCounter
+        global myTurn, turnShotCounter, MACHINE
         # send the location of the cell to shoot
-        if self.machine == "HOST":
+        if MACHINE == "HOST":
             self.connection.sendall(str.encode(f'{coord[0]},{coord[1]}'))
             cellStatus = self.connection.recv(10).decode()
         else:
@@ -273,22 +274,22 @@ class Game:
     # Receives the location of the cell to shoot and returns a hit or miss to the other machine
     def recvMove(self):
         print("receiving")
-        global myTurn
+        global myTurn, MACHINE
         # split the incoming coord into x and y
-        if self.machine == "HOST":
+        if MACHINE == "HOST":
             cellLoc = [int(x) for x in self.connection.recv(10).decode().split(',')]
         else:
             cellLoc = [int(x) for x in self.socket.recv(10).decode().split(',')]
         
         # Check if the chosen cell contains a hit or miss
         if self.shipFrame.shipMap[cellLoc[0]][cellLoc[1]] == 'o':
-            if self.machine == "HOST":
+            if MACHINE == "HOST":
                 self.connection.sendall(str.encode('hit'))
             else:
                 self.socket.sendall(str.encode('hit'))
             self.shipFrame.hitCell(cellLoc[0], cellLoc[1])
         else:
-            if self.machine == "HOST":
+            if MACHINE == "HOST":
                 self.connection.sendall(str.encode('miss'))
             else:
                 self.socket.sendall(str.encode('miss'))
@@ -310,14 +311,14 @@ class Game:
 
     # Starts the game loop instead of tk.mainloop()
     def startGameLoop(self, window):
-        global myTurn
-        firstStart = True if self.machine == "CLIENT" else False
+        global myTurn, MACHINE
+        firstStart = True if MACHINE == "CLIENT" else False
         # Start the game loop
         while True:
             if not myTurn:
                 if not firstStart:
                     # listen for loss or continue signal
-                    if self.machine == "HOST":
+                    if MACHINE == "HOST":
                         gameStatus = self.connection.recv(10).decode()
                     else:
                         gameStatus = self.socket.recv(10).decode()
@@ -332,7 +333,7 @@ class Game:
                     self.recvMove()
 
                 # Send loss or continue signal
-                if self.machine == "HOST":
+                if MACHINE == "HOST":
                     if self.checkForLoss():
                         self.connection.sendall(str.encode('loss'))
                         print("You Lose!")
