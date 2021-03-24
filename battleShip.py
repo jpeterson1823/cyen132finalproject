@@ -10,6 +10,8 @@ MACHINE = 'HOST'
 global myTurn
 myTurn = False
 
+# Used to count how many shots has been taken
+# Helps determine the current turn
 global turnShotCounter
 turnShotCounter = 0
 
@@ -21,7 +23,7 @@ class ShotFrame(Frame):
         self.game = game
         self.setup()
        
-
+    # Sets up the shot frame
     def setup(self):
         # Load and resize all images to 50x50 pixels
         RESCALE_MODIFIER = 10
@@ -45,7 +47,8 @@ class ShotFrame(Frame):
         # pack the frame
         self.pack(side=LEFT, fill=X, expand=1, anchor=N)
 
-    
+    # Processes the button press of a shot cell and determines if
+    # it was a hit or miss
     def process(self, buttonLoc):
         global myTurn, turnShotCounter
         if myTurn:
@@ -81,7 +84,7 @@ class ShipFrame(Frame):
         self.current_ship = "Carrier"
         self.preGame = True
     
-
+    # Sets up the game
     def setup(self):
         # Load and resize all images to 50x50 pixels
         RESCALE_MODIFIER = 10
@@ -118,7 +121,7 @@ class ShipFrame(Frame):
         self.pack(side=RIGHT, fill=X, expand=1, anchor=E)
         return shipMap
     
-    
+    # Loads the premade map
     def getFormattedMap(self):
         rawMap = open("testmaps/a.map").readlines()
         formattedMap = []
@@ -129,14 +132,14 @@ class ShipFrame(Frame):
             formattedMap.append(row)
         return formattedMap
 
-    
+    # Places all the ship tiles based on a premade map
     def placeShips(self):
         for row in range(len(self.shipMap)):
             for cell in range(len(self.shipMap)):
                 if self.shipMap[row][cell] == 'o':
                     self.shipGridButtons[row][cell].configure(image=self.determineCellSprite(row, cell))
 
-
+    # Determines the sprite of the current cell
     def determineCellSprite(self, row, cell):
         above = self.checkCellAbove(row, cell)
         below = self.checkCellBelow(row, cell)
@@ -157,7 +160,8 @@ class ShipFrame(Frame):
         else:
             return self.SHIP_END_HORIZONTAL
 
-
+    # Checks above the cell of a ship pane
+    # Used to decide what sprite should be used
     def checkCellAbove(self, row, cell):
         if row != 0:
             # If ship cell has another ship cell above
@@ -165,32 +169,35 @@ class ShipFrame(Frame):
                 return True
         return False
     
-
+    # Checks below the cell of a ship pane
+    # Used to decide what sprite should be used
     def checkCellBelow(self, row, cell):
         if row != 9:
             if self.shipMap[row+1][cell] == 'o':
                 return True
         return False
     
-
+    # Checks to the right of a cell ship pane
+    # Used to decide what sprite should be used
     def checkCellRight(self, row, cell):
         if cell != 9:
             if self.shipMap[row][cell+1] == 'o':
                 return True
         return False
     
-
+    # Checks to the left for a cell ship pane
+    # Used to decide what sprite should be used
     def checkCellLeft(self, row, cell):
         if cell != 0:
             if self.shipMap[row][cell-1] == 'o':
                 return True
         return False
 
-    
+    # Changes the sprite of the cell to hit
     def hitCell(self, x, y):
         self.shipGridButtons[x][y].configure(image=self.HIT_IMG)
     
-
+    # Filler Code for processing press of ship buttons
     def process(self, x, y):
         print(f"ShipFrame: ({x},{y})")
 
@@ -198,6 +205,7 @@ class ShipFrame(Frame):
 class Game:
     def __init__(self, window):
         global MACHINE
+        self.window = window
         self.shotFrame = ShotFrame(window, self)
         self.shipFrame = ShipFrame(window)
         
@@ -205,9 +213,9 @@ class Game:
             self.socket, self.connection, self.client_addr = self.setupHostNetcode()
         else:
             self.socket = self.setupClientNetcode()
-        self.startGameLoop(window)
+        self.startGameLoop()
     
-
+    # Sets up netcode for host machine
     def setupHostNetcode(self):
         # get current IPv4
         print("Getting current IPv4...", end=' ')
@@ -229,7 +237,7 @@ class Game:
         # return the socket, connection, and client address
         return s, connection, client_addr
 
-    
+    # Sets up the netcode for client machine
     def setupClientNetcode(self):
         # Ask for input of host IPv4
         SERVER_IP = input("Please enter the IPv4 of host machine: ")
@@ -247,11 +255,9 @@ class Game:
         # return the socket
         return s
     
-    
     # Used to obtain the machine's IPv4
     def getLocalIP(self):
         return subprocess.check_output(['hostname', '--all-ip-addresses']).decode().strip()
-
 
     # Sends the location of the cell to shoot to the other machine    
     def sendMove(self, coord):
@@ -270,7 +276,6 @@ class Game:
         else:
             return False
         
-
     # Receives the location of the cell to shoot and returns a hit or miss to the other machine
     def recvMove(self):
         print("receiving")
@@ -294,8 +299,8 @@ class Game:
             else:
                 self.socket.sendall(str.encode('miss'))
         self.shipFrame.shipMap[cellLoc[0]][cellLoc[1]] = 'x'
-        
-    
+
+    # Checks for loss    
     def checkForLoss(self):
         numOfShipSpaces = 0
         for i in range(len(self.shipFrame.shipMap)-1):
@@ -307,10 +312,17 @@ class Game:
             return True
         return False
 
-
+    # Resets the game
+    def reset(self):
+        # Destroy the current frames
+        self.shipFrame.destroy()
+        self.shotFrame.destroy()
+        # Replace the destroyed frames with new ones
+        self.shotFrame = ShotFrame(self.window, self)
+        self.shipFrame = ShipFrame(self.window)
 
     # Starts the game loop instead of tk.mainloop()
-    def startGameLoop(self, window):
+    def startGameLoop(self):
         global myTurn, MACHINE
         firstStart = True if MACHINE == "CLIENT" else False
         # Start the game loop
@@ -352,8 +364,8 @@ class Game:
             firstStart = False
 
             # update the tkinter window and display changes
-            window.update_idletasks()
-            window.update()
+            self.window.update_idletasks()
+            self.window.update()
 
 
 def main():
