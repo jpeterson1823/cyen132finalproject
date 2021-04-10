@@ -64,6 +64,7 @@ class ShipFrame(Frame):
         Frame.__init__(self, parent, bg="blue", width=500, height=500)
         parent.attributes("-fullscreen", False)
         self.shipMap = self.getFormattedMap()
+        self.alreadyPlaced = [[False for x in range(10)] for _ in range(10)]
         self.setup()
         self.current_ship = "Carrier"
         self.preGame = True
@@ -106,7 +107,7 @@ class ShipFrame(Frame):
     
     
     def getFormattedMap(self):
-        rawMap = open("testmaps/a.map").readlines()
+        rawMap = open("testmaps/test.txt").readlines()
         formattedMap = []
         for line in rawMap:
             row = []
@@ -119,8 +120,11 @@ class ShipFrame(Frame):
     def placeShips(self):
         for row in range(len(self.shipMap)):
             for cell in range(len(self.shipMap)):
-                if self.shipMap[row][cell] == 'o':
+                if self.shipMap[row][cell] == 'o' and self.alreadyPlaced[row][cell] == False:
                     self.shipGridButtons[row][cell].configure(image=self.determineCellSprite(row, cell))
+                    self.alreadyPlaced[row][cell] = True
+                elif self.shipMap[row][cell] == 'o' and self.alreadyPlaced[row][cell] == True:
+                    print(f"Sprite already placed at ({row}, {cell}).")
 
     
 
@@ -130,6 +134,7 @@ class ShipFrame(Frame):
         right = self.checkCellRight(row, cell)
         left = self.checkCellLeft(row, cell)
 
+        # Logic does not work if other ships' parts are directly next to eachother
         if above and below:
             return self.SHIP_MID_VERTICAL
         elif above and not below:
