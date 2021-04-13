@@ -1,8 +1,12 @@
 from tkinter import *
+import logging
 
 # Shows all friendly ships and if/where they have been hit
 class FriendlyFrame(Frame):
     def __init__(self, parent):
+        # Used for logging
+        self.__classStr = 'FriendlyFrame: '
+        
         Frame.__init__(self, parent, bg="blue", width=500, height=500)
         parent.attributes("-fullscreen", False)
         self.shipMap = self.getFormattedMap()
@@ -12,32 +16,32 @@ class FriendlyFrame(Frame):
     
     # Sets up the game
     def setup(self):
-        # Load and resize all images to 50x50 pixels
-        RESCALE_MODIFIER = 10
+        # Load and resize all images to 23x23 pixels
+        RESCALE_MODIFIER = 21
 
         # Load Tile Images
-        self.TILE_IMG = PhotoImage(file="sprites/friendly_tile.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
-        self.HIT_IMG = PhotoImage(file="sprites/hit2.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
-        self.MISS_IMG = PhotoImage(file="sprites/miss2.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
+        self.TILE_IMG = PhotoImage(file="../sprites/friendly_tile.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
+        self.HIT_IMG = PhotoImage(file="../sprites/hit2.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
+        self.MISS_IMG = PhotoImage(file="../sprites/miss2.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
 
         # Load Verticle Ship Sprites
-        self.SHIP_START_VERTICAL = PhotoImage(file="sprites/ship_start_vertical.png").subsample(2, 2)
-        self.SHIP_MID_VERTICAL = PhotoImage(file="sprites/ship_mid_vertical.png").subsample(2, 2)
-        self.SHIP_END_VERTICAL = PhotoImage(file="sprites/ship_end_vertical.png").subsample(2, 2)
+        self.SHIP_START_VERTICAL = PhotoImage(file="../sprites/ship_start_vertical.png").subsample(5, 5)
+        self.SHIP_MID_VERTICAL = PhotoImage(file="../sprites/ship_mid_vertical.png").subsample(5, 5)
+        self.SHIP_END_VERTICAL = PhotoImage(file="../sprites/ship_end_vertical.png").subsample(5, 5)
 
         # Load Horizontal Ship Sprites
-        self.SHIP_START_HORIZONTAL = PhotoImage(file="sprites/ship_start_horizontal.png").subsample(2, 2)
-        self.SHIP_MID_HORIZONTAL = PhotoImage(file="sprites/ship_mid_horizontal.png").subsample(2, 2)
-        self.SHIP_END_HORIZONTAL = PhotoImage(file="sprites/ship_end_horizontal.png").subsample(2, 2)
+        self.SHIP_START_HORIZONTAL = PhotoImage(file="../sprites/ship_start_horizontal.png").subsample(5, 5)
+        self.SHIP_MID_HORIZONTAL = PhotoImage(file="../sprites/ship_mid_horizontal.png").subsample(5, 5)
+        self.SHIP_END_HORIZONTAL = PhotoImage(file="../sprites/ship_end_horizontal.png").subsample(5, 5)
 
         # initalize grid full of buttons
-        self.shipGridButtons = [[Button(self, image=self.TILE_IMG, borderwidth=0, highlightthickness=0,
+        self.shipGridButtons = [[Button(self, image=self.TILE_IMG, borderwidth=0, highlightthickness=0, relief=SUNKEN,
                                     command=lambda x=col, y=row:self.process(x, y)) for row in range(10)] for col in range(10)]
         
         # Add buttons to frame
         for i in range(10):
-            print(f"placing row {i} ship buttons")
             for j in range(10):
+                #self.shipGridButtons[i][j]['state'] = 'disabled'
                 self.shipGridButtons[i][j].grid(row=i, column=j, sticky=N+E+S+W)
 
         # create map for placing ships
@@ -49,7 +53,7 @@ class FriendlyFrame(Frame):
     
     # Loads the premade map
     def getFormattedMap(self):
-        rawMap = open("testmaps/a.map").readlines()
+        rawMap = open("../testmaps/a.map").readlines()
         formattedMap = []
         for line in rawMap:
             row = []
@@ -125,4 +129,4 @@ class FriendlyFrame(Frame):
     
     # Filler Code for processing press of ship buttons
     def process(self, x, y):
-        print(f"ShipFrame: ({x},{y})")
+        logging.info(self.__classStr + f"Button pressed ({x},{y})")

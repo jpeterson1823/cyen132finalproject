@@ -1,13 +1,15 @@
 from tkinter import *
-from src.Game import Game
+from Game import Game
+import logging
+
+logging.getLogger().setLevel(logging.INFO)
 
 #create game window
 window = Tk()
 #set title
 window.title("BATTLESHIP: PI EDITION")
-#shotFrame = ShotFrame(window)
-#shipFrame = ShipFrame(window)
-#window.mainloop()
 
 # Start game
 Game(window)
+
+window.mainloop()
