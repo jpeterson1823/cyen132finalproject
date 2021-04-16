@@ -47,7 +47,7 @@ class NetworkHandler:
     def __clientSetup(self):
         # Get host's IPv4 from user input
         self.hostipv4 = input("Client setup initialized. Please enter the host's IPv4: ")
-        while input("Entered IPv4: {hostipv4}\n Is this correct? (Y/n) ").lower() != 'y':
+        while input(f"Entered IPv4: {self.hostipv4}\n Is this correct? (Y/n) ").lower() != 'y':
             self.hostipv4 = input("Please re-enter the host's IPv4: ")
         
         # Create a TCP socket
@@ -58,6 +58,7 @@ class NetworkHandler:
     def __getIPv4(self):
         # Get IPv4 with subprocess
         #ipv4 = subprocess.check_output(['hostname', '--all-ip-addresses'])
+        # This next line is for windows developement
         ipv4 = socket.gethostbyname(socket.gethostname())
         # Convert to string and clean up, then return
         return ipv4.strip()

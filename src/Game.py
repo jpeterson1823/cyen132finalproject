@@ -47,7 +47,7 @@ class Game:
         logging.info(self.__classStr + "Created enemy and friendly frames.")
 
         # Create network handler
-        self.nethandler = NetworkHandler('host')
+        self.nethandler = NetworkHandler("client")
         #self.nethandler = NetworkHandler('client')
         logging.info(self.__classStr + "Created network handler.")
 
