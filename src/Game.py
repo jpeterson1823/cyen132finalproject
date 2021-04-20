@@ -79,7 +79,7 @@ class Game:
 
 
     # Sends the desired shot locations to the other machine when it is the player's turn
-    def shoot(self, desiredShots: list[set]):
+    def shoot(self, desiredShots):
         # Convert desiredShots from a list of sets (which are the points) to a data string
         datastr = ''
         for shot in desiredShots:
@@ -96,30 +96,35 @@ class Game:
     
     # Processes game input received from network manager
     def processData(self, data):
+        logging.info(self.__classStr + "Processing data...")
         if data == "READY_UP":
             if self.nethandler.machineType == "host":
+                print("ready up client")
                 self.clientReadyFlag = True
             else:
+                print("ready up host")
                 self.hostReadyFlag = True
-        elif data == "READY_RESET":
-            self.hostReadyFlag = False
-            self.clientReadyFlag = False
         else:
+            print("coords and stuffs")
+            data = data.replace("READY_UP", "")
             self.hitmiss = self.checkHits(data)
             # TODO: Send hit or miss to other machine
         
     
     # TODO: Checks the game board and sees if the opponent chose coords that hit a ship
     def checkHits(self, data):
+        logging.info(self.__classStr + "Checking hits...")
         hitmiss = []
         for coordstr in data.split(";"):
-            temp = data.split(',')
+            temp = coordstr.split(',')
             x = int(temp[0])
             y = int(temp[1])
             if self.friendlyFrame.shipMap[x][y] != '-':
                 hitmiss.append(True)
+                self.friendlyFrame.hitCell(x, y)
             else:
                 hitmiss.append(False)
+        logging.info(self.__classStr + "Set hits if there were any.")
         return hitmiss
 
     # TODO: Resets the entire game
@@ -175,10 +180,10 @@ class Game:
             logging.info(self.__classStr + "Waiting for other machine's ready flag...")
             if self.nethandler.machineType == "host":
                 while self.clientReadyFlag == False:
-                    pass
+                    self.checkExitFlag()
             else:
                 while self.hostReadyFlag == False:
-                    pass
+                    self.checkExitFlag()
             logging.info(self.__classStr + "Received ready flag from other machine")
 
             # Reset ready flags

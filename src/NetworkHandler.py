@@ -141,13 +141,13 @@ class NetworkHandler:
 
     # Attempts to receive data from the established socket
     def receive(self, expectedBytes):
-        try:
-            if self.machineType == 'host':
-                return self.iconnection.recv(expectedBytes).decode()
-            else:
-                return self.isocket.recv(expectedBytes).decode()
-        except:
-            return None
+        #try:
+        if self.machineType == 'host':
+            return self.iconnection.recv(expectedBytes)
+        else:
+            return self.isock.recv(expectedBytes)
+        #except:
+        #    return None
         
 
     # sends a string to the other machine
