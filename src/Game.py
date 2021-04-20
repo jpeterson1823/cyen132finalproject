@@ -107,13 +107,28 @@ class Game:
         elif data == "LOSS":
             print("YOU WIN!")
             self.closeThreads()
+        elif data[0:3] == "SR:":
+            data.replace("SR:", "")
+            self.showShots(data)
         else:
             print("coords and stuffs")
             data = data.replace("READY_UP", "")
-            self.hitmiss = self.checkHits(data)
-            # TODO: Send hit or miss to other machine
+            self.sendShotResults(self.checkHits(data))
         
     
+    # Sends the shot statuses to the other machine
+    def sendShotResults(self, hitmiss):
+        data = 'SR:'
+        # Convert true false list to data str
+        for val in hitmiss:
+            if val == True:
+                data += '1;'
+            else:
+                data += '0;'
+        # Remove trailing ';'
+        data = data[0:len(data)-1]
+        
+    # Checks the friendlyFrame board for a hit and updates the image
     def checkHits(self, data):
         logging.info(self.__classStr + "Checking hits...")
         hitmiss = []
@@ -131,6 +146,18 @@ class Game:
                 hitmiss.append(False)
         logging.info(self.__classStr + "Set hits if there were any.")
         return hitmiss
+
+
+    # Updates the enemyFrame to show if player's shots were a hit or miss
+    def showShots(self, data):
+        shotCounter = 0
+        for status in data.split(';'):
+            coord = self.previousDesiredShots[shotCounter]
+            if status == '1':
+                self.enemyFrame.updateCell(coord[0], coord[1], 1)
+            else:
+                self.enemyFrame.updateCell(coord[0], coord[1], 0)
+            shotCounter += 1
 
 
     # TODO: Resets the entire game
@@ -154,6 +181,7 @@ class Game:
             self.nethandler.strsend("LOSS")
             print("YOU LOSE!")
 
+
     # General game loop
     def loop(self):
         while True:
@@ -170,7 +198,9 @@ class Game:
                 # Check for exit command
                 self.checkExitFlag()
                 self.checkWin()
-            
+
+            self.previousDesiredShots = self.enemyFrame.desiredShots
+
             # Parse desired shots into transmittable data str
             datastr = ''
             for shot in self.enemyFrame.desiredShots:
