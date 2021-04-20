@@ -34,6 +34,8 @@ class Game:
         self.nethandler.exitFlag = True
         self.gameLoopThread.join()
         logging.info(self.__classStr + "Joined game loop thread with main thread.")
+        self.nethandler.listenThread.join()
+        logging.info(self.__classStr + "Joined nethandler listen thread with main...")
         self.window.destroy()
         logging.info(self.__classStr + "Destroyed game window.")
 
@@ -56,8 +58,7 @@ class Game:
         logging.info(self.__classStr + "Created enemy and friendly frames.")
 
         # Create network handler
-        self.nethandler = NetworkHandler("client")
-        #self.nethandler = NetworkHandler('client')
+        self.nethandler = NetworkHandler(self, machineType="client")
         logging.info(self.__classStr + "Created network handler.")
 
         # Establish connection to other machine
@@ -73,6 +74,8 @@ class Game:
         # Start game loop thread
         logging.info(self.__classStr + "Starting game loop thread...")
         self.gameLoopThread.start()
+        logging.info(self.__classStr + "Starting listen loop thread...")
+        self.nethandler.listenThread.start()
 
 
     # Sends the desired shot locations to the other machine when it is the player's turn
@@ -165,8 +168,8 @@ class Game:
             logging.info(self.__classStr + "Set current machine's ready flag.")
 
             # Send ready flag to ther machine
+            logging.info(self.__classStr + "Sending ready flag to other machine.")
             self.nethandler.strsend("READY_UP")
-            logging.info(self.__classStr + "Sent ready flag to other machine.")
             
             # Wait for other machine to be ready
             logging.info(self.__classStr + "Waiting for other machine's ready flag...")

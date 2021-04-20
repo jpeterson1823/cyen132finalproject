@@ -1,4 +1,3 @@
-from Game import Game
 import socket
 import logging
 import subprocess
@@ -37,12 +36,6 @@ class NetworkHandler:
         self.listenThread = threading.Thread(target=self.listenLoop)
         logging.info(self.__classStr + "Created listening thread.")
         
-        # Attempt to connect to either host or client machine
-        if autoConnect == True:
-            logging.info(self.__classStr + "Starting automatic connection attempt...")
-            if self.connect == False:
-                logging.error(self.__classStr + "Connection to other machine failed to be established.")
-
 
     # Sets up netcode for host machine
     def __hostSetup(self):
@@ -55,7 +48,7 @@ class NetworkHandler:
 
         # Create command socket with oport
         self.osock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.osock.bind((self.ipv4, self.iport))
+        self.osock.bind((self.ipv4, self.oport))
 
 
     # Sets up netcode for client machine
@@ -66,7 +59,8 @@ class NetworkHandler:
             self.hostipv4 = input("Please re-enter the host's IPv4: ")
         
         # Create a TCP socket
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.isock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.osock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
     # Grabs current IPv4
@@ -84,16 +78,16 @@ class NetworkHandler:
         # Client connection setup
         if self.machineType == 'client':
             try: 
-                logging.info(self.__classStr + f"Attempting to connect to host at {self.hostipv4}:{self.port}...")
+                logging.info(self.__classStr + f"Attempting to connect to host at {self.hostipv4}...")
 
                 # Attempt to connect to host listen port to client command port
                 #       use iport because the listen ports are the same on each device
-                self.oport.connect((self.hostipv4, self.iport))
+                self.osock.connect((self.hostipv4, self.iport))
                 logging.info(self.__classStr + "\tConnected to host listen port.")
                 
                 # Attempt to connect to host command port to client command port
                 #       use oport because the listen ports are the same on each device
-                self.iport.connect((self.hostipv4, self.oport))
+                self.isock.connect((self.hostipv4, self.oport))
                 logging.info(self.__classStr + "\tConnected to host command port.")
 
                 logging.info(self.__classStr + "Successfully established TCP socket connection to host.")
@@ -129,36 +123,34 @@ class NetworkHandler:
     # Constantly listens on the isock
     def listenLoop(self):
         while self.exitFlag == False:
-            received = self.receive(20).decode()
-            logging.info(self.__classStr + f"Received data: {received}")
-            self.game.processData(received)
+            received = self.receive(20)
+            if received != None:
+                received = received.decode()
+                logging.info(self.__classStr + f"Received data: {received}")
+                self.game.processData(received)
 
 
     # Attempts to sends data to the other machine, can throw connection error
     def send(self, bytedata: bytes):
-        logging.info(self.__classStr + "Attempting to send data...")
-        self.connection.sendall(bytedata)
+        if self.machineType == "host":
+            self.oconnection.sendall(bytedata)
+        else:
+            self.osock.sendall(bytedata)
         logging.info(self.__classStr + "Successfully sent data.")
     
 
     # Attempts to receive data from the established socket
     def receive(self, expectedBytes):
-        logging.info(self.__classStr + "Attempting to receive data...")
         try:
             if self.machineType == 'host':
-                return self.connection.recv(expectedBytes).decode()
+                return self.iconnection.recv(expectedBytes).decode()
             else:
-                return self.socket.recv(expectedBytes).decode()
+                return self.isocket.recv(expectedBytes).decode()
         except:
-            logging.error(self.__classStr + "Failed to reveive data.")
             return None
         
 
     # sends a string to the other machine
     def strsend(self, strdata: str):
-        try:
-            self.send(strdata.encode())
-            return True
-        except:
-            logging.error(self.__classStr + "Failed to send string data through TCP socket.")
-        return False
+        self.send(strdata.encode())
+        return True
