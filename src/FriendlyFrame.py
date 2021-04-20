@@ -125,6 +125,7 @@ class FriendlyFrame(Frame):
     # Changes the sprite of the cell to hit
     def hitCell(self, x, y):
         self.shipGridButtons[y][x].configure(image=self.HIT_IMG)
+        self.shipMap[y][x] = 'x'
         self.parent.update_idletasks()
         self.parent.update()
     

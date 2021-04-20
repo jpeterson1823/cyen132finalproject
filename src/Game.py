@@ -104,6 +104,9 @@ class Game:
             else:
                 print("ready up host")
                 self.hostReadyFlag = True
+        elif data == "LOSS":
+            print("YOU WIN!")
+            self.closeThreads()
         else:
             print("coords and stuffs")
             data = data.replace("READY_UP", "")
@@ -129,6 +132,7 @@ class Game:
         logging.info(self.__classStr + "Set hits if there were any.")
         return hitmiss
 
+
     # TODO: Resets the entire game
     def reset(self):
         logging.info(self.__classStr + "Resetting game...")
@@ -137,9 +141,23 @@ class Game:
         logging.info(self.__classStr + "Joined game-loop thread with main.")
         ## TODO: Rest of reset
 
+
+    # Checks if there is a win and acts accordingly
+    def checkWin(self):
+        counter = 0
+        for row in self.friendlyFrame.shipMap:
+            for cell in row:
+                if cell == 'x':
+                    counter += 1
+        # If every ship part has been hit
+        if counter == 17:
+            self.nethandler.strsend("LOSS")
+            print("YOU LOSE!")
+
     # General game loop
     def loop(self):
         while True:
+            self.checkWin()
             # Check for exit command
             self.checkExitFlag()
 
@@ -151,6 +169,7 @@ class Game:
             while self.enemyFrame.ready == False:
                 # Check for exit command
                 self.checkExitFlag()
+                self.checkWin()
             
             # Parse desired shots into transmittable data str
             datastr = ''
@@ -183,9 +202,11 @@ class Game:
             logging.info(self.__classStr + "Waiting for other machine's ready flag...")
             if self.nethandler.machineType == "host":
                 while self.clientReadyFlag == False:
+                    self.checkWin()
                     self.checkExitFlag()
             else:
                 while self.hostReadyFlag == False:
+                    self.checkWin()
                     self.checkExitFlag()
             logging.info(self.__classStr + "Received ready flag from other machine")
 
@@ -196,3 +217,5 @@ class Game:
             # Send coords to other machine
             self.nethandler.strsend(datastr)
             logging.info(self.__classStr + "Sent coord data string to other machine.")
+
+            self.checkWin()
