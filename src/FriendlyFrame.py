@@ -4,6 +4,7 @@ import logging
 # Shows all friendly ships and if/where they have been hit
 class FriendlyFrame(Frame):
     def __init__(self, parent):
+        self.parent = parent
         # Used for logging
         self.__classStr = 'FriendlyFrame: '
         
@@ -11,7 +12,6 @@ class FriendlyFrame(Frame):
         parent.attributes("-fullscreen", False)
         self.shipMap = self.getFormattedMap()
         self.setup()
-        self.current_ship = "Carrier"
         self.preGame = True
     
     # Sets up the game
@@ -45,11 +45,10 @@ class FriendlyFrame(Frame):
                 self.shipGridButtons[i][j].grid(row=i, column=j, sticky=N+E+S+W)
 
         # create map for placing ships
-        shipMap = self.placeShips()
+        self.placeShips()
 
         # Pack frame
         self.pack(side=RIGHT, fill=X, expand=1, anchor=E)
-        return shipMap
     
     # Loads the premade map
     def getFormattedMap(self):
@@ -57,7 +56,7 @@ class FriendlyFrame(Frame):
         formattedMap = []
         for line in rawMap:
             row = []
-            for cell in line:
+            for cell in line.strip():
                 row.append(cell)
             formattedMap.append(row)
         return formattedMap
@@ -125,7 +124,9 @@ class FriendlyFrame(Frame):
 
     # Changes the sprite of the cell to hit
     def hitCell(self, x, y):
-        self.shipGridButtons[x][y].configure(image=self.HIT_IMG)
+        self.shipGridButtons[y][x].configure(image=self.HIT_IMG)
+        self.parent.update_idletasks()
+        self.parent.update()
     
     # Filler Code for processing press of ship buttons
     def process(self, x, y):

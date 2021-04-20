@@ -40,7 +40,7 @@ class NetworkHandler:
     # Sets up netcode for host machine
     def __hostSetup(self):
         # Set timeout time to 10s
-        socket.setdefaulttimeout(10)
+        #socket.setdefaulttimeout(10)
 
         # Create listening socket with iport
         self.isock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

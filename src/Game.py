@@ -111,15 +111,17 @@ class Game:
             # TODO: Send hit or miss to other machine
         
     
-    # TODO: Checks the game board and sees if the opponent chose coords that hit a ship
     def checkHits(self, data):
         logging.info(self.__classStr + "Checking hits...")
         hitmiss = []
         for coordstr in data.split(";"):
+            print(coordstr)
             temp = coordstr.split(',')
             x = int(temp[0])
             y = int(temp[1])
-            if self.friendlyFrame.shipMap[x][y] != '-':
+            print(self.friendlyFrame.shipMap[y][x])
+            if self.friendlyFrame.shipMap[y][x] != '-':
+                print('hit')
                 hitmiss.append(True)
                 self.friendlyFrame.hitCell(x, y)
             else:
@@ -163,6 +165,7 @@ class Game:
             logging.info(self.__classStr + "Reset desiredShots.")
             # Disable player input for shots
             self.enemyFrame.disableInput()
+            self.enemyFrame.ready = False
             logging.info(self.__classStr + "Disabled player input.")
 
             # Set machine ready flag
