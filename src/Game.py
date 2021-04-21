@@ -185,8 +185,17 @@ class Game:
                     counter += 1
         # If every ship part has been hit
         if counter == 17:
-            self.nethandler.strsend("LOSS")
+            self.nethandler.strsend("LOSS|")
             print("YOU LOSE!")
+            self.endGame()
+
+    # Used to end the game without causing thread deadlock
+    def endGame(self):
+        logging.info(self.__classStr + "Ending game...")
+        self.nethandler.exitFlag = True
+        self.exitFlag = True
+        logging.info(self.__classStr + "All thread exit flags have been raised.")
+        logging.info(self.__classStr + "Press restart button to continue.")
 
 
     # General game loop
