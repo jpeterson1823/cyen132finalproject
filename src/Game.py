@@ -84,8 +84,8 @@ class Game:
         datastr = ''
         for shot in desiredShots:
             datastr += f'{shot[0]},{shot[1]};'
-        # Remove the trailing ';'
-        datastr = datastr[0:len(datastr)-1]
+        # Remove the trailing ';' and add '|' terminator
+        datastr = datastr[0:len(datastr)-1] + '|'
 
     # Checks if thread exit command has been given
     def checkExitFlag(self):
@@ -95,8 +95,14 @@ class Game:
 
     
     # Processes game input received from network manager
-    def processData(self, data):
+    def processData(self, datastr):
         logging.info(self.__classStr + "Processing data...")
+        complex_cmd = datastr.split('|')
+        for data in complex_cmd:
+            if data != '':
+                self.process(data)
+
+    def process(self, data):
         if data == "READY_UP":
             if self.nethandler.machineType == "host":
                 print("ready up client")
@@ -108,13 +114,13 @@ class Game:
             print("YOU WIN!")
             self.closeThreads()
         elif data[0:3] == "SR:":
-            data.replace("SR:", "")
+            data = data.replace("SR:", "")
             self.showShots(data)
         else:
             print("coords and stuffs")
             data = data.replace("READY_UP", "")
             self.sendShotResults(self.checkHits(data))
-        
+
     
     # Sends the shot statuses to the other machine
     def sendShotResults(self, hitmiss):
@@ -125,8 +131,9 @@ class Game:
                 data += '1;'
             else:
                 data += '0;'
-        # Remove trailing ';'
-        data = data[0:len(data)-1]
+        # Remove trailing ';' and add '|' terminator
+        data = data[0:len(data)-1] + '|'
+        self.nethandler.strsend(data)
         
     # Checks the friendlyFrame board for a hit and updates the image
     def checkHits(self, data):
@@ -205,8 +212,8 @@ class Game:
             datastr = ''
             for shot in self.enemyFrame.desiredShots:
                 datastr += f'{shot[0]},{shot[1]};'
-            # Remove trailing ';' from datastr
-            datastr = datastr[:len(datastr)-1]
+            # Remove trailing ';' from datastr and add '|' terminator
+            datastr = datastr[:len(datastr)-1] + '|'
             logging.info(self.__classStr + "Created datastring: " + datastr)
 
             # Reset EnemyFrame's desiredShots list
@@ -226,7 +233,7 @@ class Game:
 
             # Send ready flag to ther machine
             logging.info(self.__classStr + "Sending ready flag to other machine.")
-            self.nethandler.strsend("READY_UP")
+            self.nethandler.strsend("READY_UP|")
             
             # Wait for other machine to be ready
             logging.info(self.__classStr + "Waiting for other machine's ready flag...")

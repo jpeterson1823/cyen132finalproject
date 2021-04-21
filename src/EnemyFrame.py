@@ -6,6 +6,7 @@ import logging
 # Frame that shows where shots have been fired and there status
 class EnemyFrame(Frame):
     def __init__(self, game, parent):
+        self.parent = parent
         # Used for logger
         self.__classStr = 'EnemyFrame: '
 
@@ -91,12 +92,11 @@ class EnemyFrame(Frame):
             if len(self.desiredShots) == 3:
                 # Send ready flag to game
                 self.setReady(True)
-<<<<<<< HEAD
-=======
     
     def updateCell(self, x, y, status):
         if status == 1:
             self.grid[y][x].configure(image=self.HIT_IMG)
         else:
             self.grid[y][x].configure(image=self.MISS_IMG)
->>>>>>> 3f2e4c3372f2751d9775c3e2be445a53a1b95434
+        self.parent.update_idletasks()
+        self.parent.update()
