@@ -91,3 +91,12 @@ class EnemyFrame(Frame):
             if len(self.desiredShots) == 3:
                 # Send ready flag to game
                 self.setReady(True)
+<<<<<<< HEAD
+=======
+    
+    def updateCell(self, x, y, status):
+        if status == 1:
+            self.grid[y][x].configure(image=self.HIT_IMG)
+        else:
+            self.grid[y][x].configure(image=self.MISS_IMG)
+>>>>>>> 3f2e4c3372f2751d9775c3e2be445a53a1b95434

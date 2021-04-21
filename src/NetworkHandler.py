@@ -6,7 +6,11 @@ import threading
 class NetworkHandler:
     # Takes one string parameter: 'host' or 'client', default is 'host'
     def __init__(self, game: 'Game', machineType: str = 'host', autoConnect: bool = False):
+        # Create game member variable
         self.game = game
+
+        # Set timeout time to 10s
+        socket.setdefaulttimeout(5)
 
         # Create exit flag for killing threads
         self.exitFlag = False
@@ -39,8 +43,7 @@ class NetworkHandler:
 
     # Sets up netcode for host machine
     def __hostSetup(self):
-        # Set timeout time to 10s
-        #socket.setdefaulttimeout(10)
+        
 
         # Create listening socket with iport
         self.isock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -141,13 +144,13 @@ class NetworkHandler:
 
     # Attempts to receive data from the established socket
     def receive(self, expectedBytes):
-        #try:
-        if self.machineType == 'host':
-            return self.iconnection.recv(expectedBytes)
-        else:
-            return self.isock.recv(expectedBytes)
-        #except:
-        #    return None
+        try:
+            if self.machineType == 'host':
+                return self.iconnection.recv(expectedBytes)
+            else:
+                return self.isock.recv(expectedBytes)
+        except:
+            return None
         
 
     # sends a string to the other machine
