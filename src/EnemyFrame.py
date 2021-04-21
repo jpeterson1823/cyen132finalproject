@@ -1,4 +1,6 @@
 from tkinter import *
+from PIL import Image
+from PIL import ImageTk
 import logging
 
 # Frame that shows where shots have been fired and there status
@@ -8,7 +10,7 @@ class EnemyFrame(Frame):
         self.__classStr = 'EnemyFrame: '
 
         # Initialize with super constructor
-        Frame.__init__(self, parent, bg='green', width=484//2, height=500)
+        Frame.__init__(self, parent, bg='green', width=400, height=480)
         # Create member variables
         self.game = game
         # Create array used to store player's shots taken on their turn
@@ -22,20 +24,34 @@ class EnemyFrame(Frame):
 
     # Sets up the gui
     def setupGUI(self):
-        # Rescales the ../sprites so they are about 23x23 pixels
-        RESCALE_MODIFIER = 21
+        # Rescale sprites so they fit on screen
+        #RESCALE_MODIFIER = 14
+        width = 38
+        height = 46
         # Create resized PhotoImage objects
-        self.TILE_IMG = PhotoImage(file="../sprites/enemy_tile.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
-        self.HIT_IMG = PhotoImage(file="../sprites/hit2.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
-        self.MISS_IMG = PhotoImage(file="../sprites/miss2.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
+        #self.TILE_IMG = PhotoImage(file="../sprites/enemy_tile.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
+        img = Image.open("../sprites/enemy_tile.png")
+        img = img.resize((width, height), Image.ANTIALIAS)
+        self.TILE_IMG = ImageTk.PhotoImage(img)
+
+        #self.HIT_IMG = PhotoImage(file="../sprites/hit2.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
+        img = Image.open("../sprites/hit2.png")
+        img = img.resize((width, height), Image.ANTIALIAS)
+        self.HIT_IMG = ImageTk.PhotoImage(img)
+
+        #self.MISS_IMG = PhotoImage(file="../sprites/miss2.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
+        img = Image.open("../sprites/miss2.png")
+        img = img.resize((width, height), Image.ANTIALIAS)
+        self.MISS_IMG = ImageTk.PhotoImage(img)
 
         # Create a grid full of buttons
         self.grid = []
         for row in range(10):
             rowList = []
             for col in range(10):
-                button = Button(self, image=self.TILE_IMG, borderwidth=0, highlightthickness=0,
-                                command=lambda x=col, y=row: self.process(x, y))
+                button = Button(self, image=self.TILE_IMG, bd=0,
+                        highlightthickness=0, relief=FLAT, bg='black',
+                        command=lambda x=col, y=row: self.process(x, y))
                 rowList.append(button)
             self.grid.append(rowList)
         
@@ -48,7 +64,7 @@ class EnemyFrame(Frame):
                 self.grid[i][j].grid(row=i, column=j, sticky=N+E+S+W)
             
         # Pack the frame
-        self.pack(side=LEFT, fill=X, expand=1, anchor=N)
+        self.pack(side=LEFT, fill=X, expand=False, anchor=N)
     
     # Enables input to be taken from player
     def enableInput(self):

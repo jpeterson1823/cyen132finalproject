@@ -66,9 +66,9 @@ class NetworkHandler:
     # Grabs current IPv4
     def __getIPv4(self):
         # Get IPv4 with subprocess
-        #ipv4 = subprocess.check_output(['hostname', '--all-ip-addresses'])
+        ipv4 = subprocess.check_output(['hostname', '--all-ip-addresses'])
         # This next line is for windows developement
-        ipv4 = socket.gethostbyname(socket.gethostname())
+        #ipv4 = socket.gethostbyname(socket.gethostname())
         # Convert to string and clean up, then return
         return ipv4.strip()
 

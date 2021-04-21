@@ -6,6 +6,8 @@ logging.getLogger().setLevel(logging.INFO)
 
 #create game window
 window = Tk()
+# Set full screen
+window.attributes('-fullscreen', True)
 #set title
 window.title("BATTLESHIP: PI EDITION")
 

@@ -1,4 +1,6 @@
 from tkinter import *
+from PIL import Image
+from PIL import ImageTk
 import logging
 
 # Shows all friendly ships and if/where they have been hit
@@ -8,8 +10,7 @@ class FriendlyFrame(Frame):
         # Used for logging
         self.__classStr = 'FriendlyFrame: '
         
-        Frame.__init__(self, parent, bg="blue", width=500, height=500)
-        parent.attributes("-fullscreen", False)
+        Frame.__init__(self, parent, bg="blue", width=400, height=480)
         self.shipMap = self.getFormattedMap()
         self.setup()
         self.preGame = True
@@ -17,26 +18,66 @@ class FriendlyFrame(Frame):
     # Sets up the game
     def setup(self):
         # Load and resize all images to 23x23 pixels
-        RESCALE_MODIFIER = 21
+        RESCALE_MODIFIER = 13
+        width = 38
+        height = 46
 
         # Load Tile Images
-        self.TILE_IMG = PhotoImage(file="../sprites/friendly_tile.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
-        self.HIT_IMG = PhotoImage(file="../sprites/hit2.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
-        self.MISS_IMG = PhotoImage(file="../sprites/miss2.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
+        #self.TILE_IMG = PhotoImage(file="../sprites/friendly_tile.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
+        #self.HIT_IMG = PhotoImage(file="../sprites/hit2.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
+        #self.MISS_IMG = PhotoImage(file="../sprites/miss2.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
+        
+        img = Image.open("../sprites/friendly_tile.png")
+        img = img.resize((width, height), Image.ANTIALIAS)
+        self.TILE_IMG = ImageTk.PhotoImage(img)
+
+        img = Image.open("../sprites/hit2.png")
+        img = img.resize((width, height), Image.ANTIALIAS)
+        self.HIT_IMG = ImageTk.PhotoImage(img)
+
+        img = Image.open("../sprites/miss2.png")
+        img = img.resize((width, height), Image.ANTIALIAS)
+        self.MISS_IMG = ImageTk.PhotoImage(img)
 
         # Load Verticle Ship Sprites
-        self.SHIP_START_VERTICAL = PhotoImage(file="../sprites/ship_start_vertical.png").subsample(5, 5)
-        self.SHIP_MID_VERTICAL = PhotoImage(file="../sprites/ship_mid_vertical.png").subsample(5, 5)
-        self.SHIP_END_VERTICAL = PhotoImage(file="../sprites/ship_end_vertical.png").subsample(5, 5)
+        #self.SHIP_START_VERTICAL = PhotoImage(file="../sprites/ship_start_vertical.png").subsample(5, 5)
+        #self.SHIP_MID_VERTICAL = PhotoImage(file="../sprites/ship_mid_vertical.png").subsample(5, 5)
+        #self.SHIP_END_VERTICAL = PhotoImage(file="../sprites/ship_end_vertical.png").subsample(5, 5)
+        img = Image.open("../sprites/ship_start_vertical.png")
+        img = img.resize((width, height), Image.ANTIALIAS)
+        self.SHIP_START_VERTICAL = ImageTk.PhotoImage(img)
+
+        img = Image.open("../sprites/ship_mid_vertical.png")
+        img = img.resize((width, height), Image.ANTIALIAS)
+        self.SHIP_MID_VERTICAL = ImageTk.PhotoImage(img)
+
+        img = Image.open("../sprites/ship_end_vertical.png")
+        img = img.resize((width, height), Image.ANTIALIAS)
+        self.SHIP_END_VERTICAL = ImageTk.PhotoImage(img)
+
 
         # Load Horizontal Ship Sprites
-        self.SHIP_START_HORIZONTAL = PhotoImage(file="../sprites/ship_start_horizontal.png").subsample(5, 5)
-        self.SHIP_MID_HORIZONTAL = PhotoImage(file="../sprites/ship_mid_horizontal.png").subsample(5, 5)
-        self.SHIP_END_HORIZONTAL = PhotoImage(file="../sprites/ship_end_horizontal.png").subsample(5, 5)
+        #self.SHIP_START_HORIZONTAL = PhotoImage(file="../sprites/ship_start_horizontal.png").subsample(5, 5)
+        #self.SHIP_MID_HORIZONTAL = PhotoImage(file="../sprites/ship_mid_horizontal.png").subsample(5, 5)
+        #self.SHIP_END_HORIZONTAL = PhotoImage(file="../sprites/ship_end_horizontal.png").subsample(5, 5)
+        img = Image.open("../sprites/ship_start_horizontal.png")
+        img = img.resize((width, height), Image.ANTIALIAS)
+        self.SHIP_START_HORIZONTAL = ImageTk.PhotoImage(img)
+
+        img = Image.open("../sprites/ship_mid_horizontal.png")
+        img = img.resize((width, height), Image.ANTIALIAS)
+        self.SHIP_MID_HORIZONTAL = ImageTk.PhotoImage(img)
+
+        img = Image.open("../sprites/ship_end_horizontal.png")
+        img = img.resize((width, height), Image.ANTIALIAS)
+        self.SHIP_END_HORIZONTAL = ImageTk.PhotoImage(img)
+
 
         # initalize grid full of buttons
-        self.shipGridButtons = [[Button(self, image=self.TILE_IMG, borderwidth=0, highlightthickness=0, relief=SUNKEN,
-                                    command=lambda x=col, y=row:self.process(x, y)) for row in range(10)] for col in range(10)]
+        self.shipGridButtons = [[Button(self, image=self.TILE_IMG, bd=0, 
+                                highlightthickness=0, relief=FLAT, bg='black',
+                                command=lambda x=col, y=row:self.process(x, y)) 
+                                for row in range(10)] for col in range(10)]
         
         # Add buttons to frame
         for i in range(10):
@@ -48,7 +89,7 @@ class FriendlyFrame(Frame):
         self.placeShips()
 
         # Pack frame
-        self.pack(side=RIGHT, fill=X, expand=1, anchor=E)
+        self.pack(side=LEFT, fill=X, expand=1, anchor=E)
     
     # Loads the premade map
     def getFormattedMap(self):
