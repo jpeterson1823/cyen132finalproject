@@ -1,6 +1,8 @@
 from tkinter import *
+import RPi.GPIO as GPIO
 import logging
 import threading
+from time import sleep
 
 from EnemyFrame import EnemyFrame
 from FriendlyFrame import FriendlyFrame
@@ -24,22 +26,13 @@ class Game:
         # Store window in class member variable
         self.window = window
 
+        # GPIO setup
+        self.gpioSetup()
+
         # Start setup
         self.setup()
+
     
-    # Kills all threads by activating exit flags
-    def closeThreads(self):
-        logging.info(self.__classStr + "Executed closeThreads()")
-        self.exitFlag = True
-        self.nethandler.exitFlag = True
-        self.gameLoopThread.join()
-        logging.info(self.__classStr + "Joined game loop thread with main thread.")
-        self.nethandler.listenThread.join()
-        logging.info(self.__classStr + "Joined nethandler listen thread with main...")
-        self.window.destroy()
-        logging.info(self.__classStr + "Destroyed game window.")
-
-
     # Sets up the game. Handles creating the connection between
     #   the machine and game loop setup
     def setup(self):
@@ -76,6 +69,21 @@ class Game:
         self.gameLoopThread.start()
         logging.info(self.__classStr + "Starting listen loop thread...")
         self.nethandler.listenThread.start()
+
+    
+    # Kills all threads by activating exit flags
+    def closeThreads(self):
+        logging.info(self.__classStr + "Executed closeThreads()")
+        self.exitFlag = True
+        self.nethandler.exitFlag = True
+        self.gameLoopThread.join()
+        logging.info(self.__classStr + "Joined game loop thread with main thread.")
+        self.nethandler.listenThread.join()
+        logging.info(self.__classStr + "Joined nethandler listen thread with main...")
+        self.window.destroy()
+        logging.info(self.__classStr + "Destroyed game window.")
+
+
 
 
     # Sends the desired shot locations to the other machine when it is the player's turn
@@ -167,15 +175,6 @@ class Game:
             shotCounter += 1
 
 
-    # TODO: Resets the entire game
-    def reset(self):
-        logging.info(self.__classStr + "Resetting game...")
-        self.closeThreads()
-        self.gameLoopThread.join()
-        logging.info(self.__classStr + "Joined game-loop thread with main.")
-        ## TODO: Rest of reset
-
-
     # Checks if there is a win and acts accordingly
     def checkWin(self):
         counter = 0
@@ -197,6 +196,14 @@ class Game:
         logging.info(self.__classStr + "All thread exit flags have been raised.")
         logging.info(self.__classStr + "Press restart button to continue.")
 
+
+    # TODO: Checks the status of GPIO pins
+    def checkButtons(self):
+        start   = gpio.input(self.startButton)
+        reset   = gpio.input(self.resetButton)
+        shoot   = gpio.input(self.shootButton)
+        forfeit = gpio.input(self.forfeitButton)
+        pass
 
     # General game loop
     def loop(self):
