@@ -32,6 +32,28 @@ class Game:
         # Start setup
         self.setup()
 
+
+    # Sets up GPIO stuffs
+    def setupGPIO(self):
+        # Define button pins
+        self.startb   =  24
+        self.resetb   =  25
+        self.shootb   =  26
+        self.forfeitb = 27
+
+        # Define button active states (AS)
+        self.startAS   = gpio.HIGH
+        self.resetAS   = gpio.HIGH
+        self.shootAS   = gpio.HIGH
+        self.forfeitAS = gpio.HIGH
+        
+        # Setting GPIO mode
+        gpio.setmode(gpio.BCM)
+        logging.info(self.__classStr + "Set GPIO mode.")
+        # Set pins to input
+        gpio.setup([24, 25, 26, 27], gpio.INPUT)
+        logging.info(self.__classStr + "Set button pins to input.")
+
     
     # Sets up the game. Handles creating the connection between
     #   the machine and game loop setup
@@ -71,6 +93,26 @@ class Game:
         self.nethandler.listenThread.start()
 
     
+    # Resets the game to the start
+    def resetGame(self):
+        logging.info(self.__classStr + "Resetting game...")
+        self.nethandler.strsend("RESETTING")
+        self.endGame()
+        logging.info(self.__classStr + "Ending game...")
+        self.gameLoopThread.join()
+        logging.info(self.__classStr + "Joined gameloop thread with main.")
+        self.nethandler.listenThread.join()
+        logging.info(self.__classStr + "Joined listening thread thread with main.")
+        
+        # Reset all frames
+        self.enemyFrame.destroy()
+        self.friendlyFrame.destroy()
+        logging.info(self.__classStr + "Destroied Enemy and Friendly frames.")
+        
+        # Restart Game class setup
+        self.setup()
+
+    
     # Kills all threads by activating exit flags
     def closeThreads(self):
         logging.info(self.__classStr + "Executed closeThreads()")
@@ -84,8 +126,6 @@ class Game:
         logging.info(self.__classStr + "Destroyed game window.")
 
 
-
-
     # Sends the desired shot locations to the other machine when it is the player's turn
     def shoot(self, desiredShots):
         # Convert desiredShots from a list of sets (which are the points) to a data string
@@ -94,6 +134,7 @@ class Game:
             datastr += f'{shot[0]},{shot[1]};'
         # Remove the trailing ';' and add '|' terminator
         datastr = datastr[0:len(datastr)-1] + '|'
+
 
     # Checks if thread exit command has been given
     def checkExitFlag(self):
@@ -110,6 +151,8 @@ class Game:
             if data != '':
                 self.process(data)
 
+
+    # Processes the received data from the other machine
     def process(self, data):
         if data == "READY_UP":
             if self.nethandler.machineType == "host":
@@ -142,6 +185,7 @@ class Game:
         # Remove trailing ';' and add '|' terminator
         data = data[0:len(data)-1] + '|'
         self.nethandler.strsend(data)
+
         
     # Checks the friendlyFrame board for a hit and updates the image
     def checkHits(self, data):
@@ -188,6 +232,40 @@ class Game:
             print("YOU LOSE!")
             self.endGame()
 
+        
+    # Handles the buttons
+    def checkButtons(self):
+        start   = gpio.input(self.startb)
+        reset   = gpio.input(self.resetb)
+        shoot   = gpio.input(self.shootb)
+        forfeit = gpio.input(self.forfeitb)
+
+        if shoot == self.shootAS:
+            logging.info("Shoot button has been pressed.")
+            if self.enemyFrame.ready:
+                # Send ready flag to ther machine
+                logging.info(self.__classStr + "Sending ready flag to other machine.")
+                self.nethandler.strsend("READY_UP|")
+            else:
+                logging.critical("Cannot send ready flag: 3 cells have not been selected")
+            # Flip the activated status of button
+            self.flipActiveStatus(self.shootAS)
+
+        if reset == self.resetAS:
+            self.resetGame()
+            logging.critical("Reset button has been pressed.")
+            # Flip the activated status of button
+            self.flipActiveStatus(self.resetAS)
+    
+
+    # Flips the active status of a button
+    def flipActiveStatus(self, buttonStatus):
+        if buttonStatus == gpio.HIGH:
+            buttonStatus = gpio.LOW
+        else:
+            buttonStatus = gpio.HIGH
+
+
     # Used to end the game without causing thread deadlock
     def endGame(self):
         logging.info(self.__classStr + "Ending game...")
@@ -196,14 +274,6 @@ class Game:
         logging.info(self.__classStr + "All thread exit flags have been raised.")
         logging.info(self.__classStr + "Press restart button to continue.")
 
-
-    # TODO: Checks the status of GPIO pins
-    def checkButtons(self):
-        start   = gpio.input(self.startButton)
-        reset   = gpio.input(self.resetButton)
-        shoot   = gpio.input(self.shootButton)
-        forfeit = gpio.input(self.forfeitButton)
-        pass
 
     # General game loop
     def loop(self):
@@ -247,9 +317,7 @@ class Game:
                 self.clientReadyFlag = True
             logging.info(self.__classStr + "Set current machine's ready flag.")
 
-            # Send ready flag to ther machine
-            logging.info(self.__classStr + "Sending ready flag to other machine.")
-            self.nethandler.strsend("READY_UP|")
+            
             
             # Wait for other machine to be ready
             logging.info(self.__classStr + "Waiting for other machine's ready flag...")
