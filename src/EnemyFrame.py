@@ -6,9 +6,11 @@ import logging
 # Frame that shows where shots have been fired and there status
 class EnemyFrame(Frame):
     def __init__(self, game, parent):
+        # Create class logger
+        self.log = logging.getLogger("EnemyFrame")
+        logging.getLogger("EnemyFrame").setLevel(logging.INFO)
+
         self.parent = parent
-        # Used for logger
-        self.__classStr = 'EnemyFrame: '
 
         # Initialize with super constructor
         Frame.__init__(self, parent, bg='green', width=400, height=480)
@@ -86,7 +88,7 @@ class EnemyFrame(Frame):
     def process(self, x, y):
         if self.inputEnabled:
             if len(self.desiredShots) < self.game.SHOTS_PER_TURN:
-                logging.info(self.__classStr + "Recorded desired shot")
+                self.log.info("Recorded desired shot")
                 self.desiredShots.append([x,y])
             
             if len(self.desiredShots) == 3:

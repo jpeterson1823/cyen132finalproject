@@ -6,9 +6,11 @@ import logging
 # Shows all friendly ships and if/where they have been hit
 class FriendlyFrame(Frame):
     def __init__(self, parent):
+        # Create class logger
+        self.log = logging.getLogger("FriendlyFrame")
+        logging.getLogger("FriendlyFrame").setLevel(logging.INFO)
+
         self.parent = parent
-        # Used for logging
-        self.__classStr = 'FriendlyFrame: '
         
         Frame.__init__(self, parent, bg="blue", width=400, height=480)
         self.shipMap = self.getFormattedMap()
@@ -172,4 +174,4 @@ class FriendlyFrame(Frame):
     
     # Filler Code for processing press of ship buttons
     def process(self, x, y):
-        logging.info(self.__classStr + f"Button pressed ({x},{y})")
+        self.log.info(f"Button pressed ({x},{y})")

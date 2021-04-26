@@ -6,6 +6,10 @@ import threading
 class NetworkHandler:
     # Takes one string parameter: 'host' or 'client', default is 'host'
     def __init__(self, game: 'Game', machineType: str = 'host', autoConnect: bool = False):
+        # Create class logger
+        self.log = logging.getLogger("NetworkHandler")
+        logging.getLogger("NetworkHandler").setLevel(logging.INFO)
+
         # Create game member variable
         self.game = game
 
@@ -14,9 +18,6 @@ class NetworkHandler:
 
         # Create exit flag for killing threads
         self.exitFlag = False
-
-        # Used for logging
-        self.__classStr = 'NetworkHandler: '
 
         # Input and Output ports
         self.iport = 10000
@@ -28,17 +29,17 @@ class NetworkHandler:
 
         # Setup netcode for either host or client
         if machineType == 'client':
-            logging.info(self.__classStr + "Starting client setup...")
+            self.log.info("Starting client setup...")
             self.__clientSetup()
-            logging.info(self.__classStr + "Completed client setup.")
+            self.log.info("Completed client setup.")
         else:
-            logging.info(self.__classStr + "Starting host setup...")
+            self.log.info("Starting host setup...")
             self.__hostSetup()
-            logging.info(self.__classStr + "Completed host setup.")
+            self.log.info("Completed host setup.")
 
         # Create listening thread
         self.listenThread = threading.Thread(target=self.listenLoop)
-        logging.info(self.__classStr + "Created listening thread.")
+        self.log.info("Created listening thread.")
         
 
     # Sets up netcode for host machine
@@ -81,45 +82,45 @@ class NetworkHandler:
         # Client connection setup
         if self.machineType == 'client':
             try: 
-                logging.info(self.__classStr + f"Attempting to connect to host at {self.hostipv4}...")
+                self.log.info(f"Attempting to connect to host at {self.hostipv4}...")
 
                 # Attempt to connect to host listen port to client command port
                 #       use iport because the listen ports are the same on each device
                 self.osock.connect((self.hostipv4, self.iport))
-                logging.info(self.__classStr + "\tConnected to host listen port.")
+                self.log.info("\tConnected to host listen port.")
                 
                 # Attempt to connect to host command port to client command port
                 #       use oport because the listen ports are the same on each device
                 self.isock.connect((self.hostipv4, self.oport))
-                logging.info(self.__classStr + "\tConnected to host command port.")
+                self.log.info("\tConnected to host command port.")
 
-                logging.info(self.__classStr + "Successfully established TCP socket connection to host.")
+                self.log.info("Successfully established TCP socket connection to host.")
                 return True
             except socket.timeout:
-                logging.error(self.__classStr + f"Connection to {self.hostipv4}:{self.port} timed out.")
+                self.log.error(f"Connection to {self.hostipv4}:{self.port} timed out.")
             return False
 
         # Host connection setup
         else:
             try:
-                logging.info(self.__classStr + "Listening for client connection attempts...")
+                self.log.info("Listening for client connection attempts...")
 
                 # Listen for a connection attempt on the listen port
                 self.isock.listen(1)
                 # Establish connection to client command port
                 self.iconnection, self.clientAddress = self.isock.accept()
-                logging.info(self.__classStr + "\tConnected to client command port.")
+                self.log.info("\tConnected to client command port.")
 
                 # Listen for a connection attempt on the command port
                 self.osock.listen(1)
                 # Establish connection to client listen port
                 self.oconnection, self.clientAddress = self.osock.accept()
-                logging.info(self.__classStr + "\tConnected to client listen port.")
+                self.log.info("\tConnected to client listen port.")
 
-                logging.info(self.__classStr + "Successfully established TCP socket connection to client.")
+                self.log.info("Successfully established TCP socket connection to client.")
                 return True
             except:
-                logging.error(self.__classStr + "Failed to establish connection to client machine.")
+                self.log.error("Failed to establish connection to client machine.")
             return False
 
     
@@ -129,7 +130,7 @@ class NetworkHandler:
             received = self.receive(20)
             if received != None:
                 received = received.decode()
-                logging.info(self.__classStr + f"Received data: {received}")
+                self.log.info(f"Received data: {received}")
                 self.game.processData(received)
 
 
@@ -139,7 +140,7 @@ class NetworkHandler:
             self.oconnection.sendall(bytedata)
         else:
             self.osock.sendall(bytedata)
-        logging.info(self.__classStr + "Successfully sent data.")
+        self.log.info("Successfully sent data.")
     
 
     # Attempts to receive data from the established socket
