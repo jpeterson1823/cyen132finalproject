@@ -73,13 +73,17 @@ class GPIOHandler:
             else:
                 self.forfeitFlag = False
         self.log.critical("Exit flag raised.")
+        sleep(0.25)
 
 
     # Flashes the warning LEDs
     def __flashWarning(self):
-        for i in range(5):
+        delay = 0.0625
+        for i in range(10):
             gpio.output(self.warnLights, gpio.HIGH)
-            sleep(0.5)
+            sleep(delay)
+            gpio.output(self.warnLights, gpio.LOW)
+            sleep(delay)
 
 
     # Updates the shot selection LEDs' status

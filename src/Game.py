@@ -119,16 +119,16 @@ class Game:
 
 
     # Processes game input received from network manager
-    def processData(self, datastr):
+    def process(self, datastr):
         self.log.info("Processing data...")
         complex_cmd = datastr.split('|')
         for data in complex_cmd:
             if data != '':
-                self.process(data)
+                self.__process(data)
 
 
     # Processes the received data from the other machine
-    def process(self, data):
+    def __process(self, data):
         if data == "READY_UP":
             if self.nethandler.machineType == "host":
                 print("ready up client")

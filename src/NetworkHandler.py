@@ -131,7 +131,7 @@ class NetworkHandler:
             if received != None:
                 received = received.decode()
                 self.log.info(f"Received data: {received}")
-                self.game.processData(received)
+                self.game.process(received)
 
 
     # Attempts to sends data to the other machine, can throw connection error

@@ -20,7 +20,7 @@ class FriendlyFrame(Frame):
     # Sets up the game
     def setup(self):
         # Load and resize all images to 23x23 pixels
-        RESCALE_MODIFIER = 13
+        #RESCALE_MODIFIER = 13
         width = 38
         height = 46
 

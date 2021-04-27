@@ -23,10 +23,10 @@ class EnemyFrame(Frame):
         # Create ready flag and set it to false on creation
         self.ready = False
         # Start GUI setup
-        self.setupGUI()
+        self.__setupGUI()
 
     # Sets up the gui
-    def setupGUI(self):
+    def __setupGUI(self):
         # Rescale sprites so they fit on screen
         #RESCALE_MODIFIER = 14
         width = 38
@@ -77,11 +77,6 @@ class EnemyFrame(Frame):
     def disableInput(self):
         self.inputEnabled = False
 
-    # Sets the ready flag to a status, telling the game class that the player
-    #   has given their input.
-    def setReady(self, status):
-        self.ready = status
-    
     # Adds up to 3 shots to an array. Once the maximum amount
     #   of shots have been placed, it then passes the info to
     #   the game class.
@@ -93,9 +88,10 @@ class EnemyFrame(Frame):
             
             if len(self.desiredShots) == 3:
                 # Send ready flag to game
-                self.setReady(True)
+                self.ready = True
     
-    def updateCell(self, x, y, status):
+    # Updates a cell according to the status
+    def __updateCell(self, x, y, status):
         if status == 1:
             self.grid[y][x].configure(image=self.HIT_IMG)
         else:
