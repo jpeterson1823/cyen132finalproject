@@ -2,6 +2,7 @@ import RPi.GPIO as gpio
 from time import sleep
 from threading import Thread
 import logging
+import IC2_LCD_driver.py
 
 # Handles all GPIO input and output.
 class GPIOHandler:
