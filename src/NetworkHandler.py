@@ -2,6 +2,7 @@ import socket
 import logging
 import subprocess
 import threading
+import time
 
 class NetworkHandler:
     # Takes one string parameter: 'host' or 'client', default is 'host'
@@ -86,6 +87,9 @@ class NetworkHandler:
                 #       use iport because the listen ports are the same on each device
                 self.osock.connect((self.hostipv4, self.iport))
                 self.log.info("\tConnected to host listen port.")
+
+                # Adding a delay in connection to make sure other machine is ready
+                time.sleep(0.5)
                 
                 # Attempt to connect to host command port to client command port
                 #       use oport because the listen ports are the same on each device

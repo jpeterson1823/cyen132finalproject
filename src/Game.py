@@ -55,6 +55,7 @@ class Game:
         self.gpioHandler = GPIOHandler()
         self.log.info("Created GPIO handler.")
 
+
         # Establish connection to other machine
         if self.nethandler.connect():
             self.log.info("Connection established to other machine.")
@@ -65,11 +66,13 @@ class Game:
         self.window.update_idletasks()
         self.window.update()
         
-        # Start game loop thread
+        # Start threads
         self.log.info("Starting game loop thread...")
         self.gameLoopThread.start()
         self.log.info("Starting listen loop thread...")
         self.nethandler.listenThread.start()
+        self.gpioHandler.buttonThread.start()
+        self.log.info("Started buttonThread.")
 
     
     # Resets the game to the start
