@@ -78,14 +78,15 @@ class Game:
     def reset(self):
         self.log.info("Resetting game...")
         self.nethandler.strsend("RESET|")
-        self.endGame()
-        self.log.info("Ending game...")
         
         # Reset all frames
         self.enemyFrame.destroy()
         self.friendlyFrame.destroy()
         self.log.info("Destroied Enemy and Friendly frames.")
         
+        self.exitFlag = False
+        self.nethandler.exitFlag = False
+        self.gpioHandler.exitFlag = False
         # Restart Game class setup
         self.setup()
 
@@ -206,6 +207,9 @@ class Game:
         self.gpioHandler.writeToLCD('Ending Game...')
         self.log.info("All thread exit flags have been raised.")
         self.log.info("Press restart button to continue.")
+        while self.gpioHandler.resetFlag == False:
+            pass
+        self.reset()
 
 
     # Checks the exitFlag and exits
@@ -219,6 +223,7 @@ class Game:
         if self.gpioHandler.forfeitFlag == True:
             self.nethandler.strsend("LOSS|")
             self.gpioHandler.writeToLCD("YOU FORFEIT")
+            self.endGame()
             exit(0)
 
     # General game loop

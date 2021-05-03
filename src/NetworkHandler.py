@@ -56,7 +56,7 @@ class NetworkHandler:
 
     # Sets up netcode for client machine
     def __clientSetup(self):
-        self.hostipv4 = '1.92.168.1.6'
+        self.hostipv4 = '192.168.1.6'
         
         # Create a TCP socket
         self.isock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
