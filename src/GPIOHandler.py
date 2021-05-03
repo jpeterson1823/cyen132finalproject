@@ -123,4 +123,3 @@ class GPIOHandler:
             self.lcd.lcd_clear()
         # Display string
         self.lcd.lcd_display_string(string, row)
-

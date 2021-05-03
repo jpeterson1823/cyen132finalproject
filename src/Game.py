@@ -74,23 +74,6 @@ class Game:
         self.log.info("Started buttonThread.")
 
     
-    # Resets the game to the start
-    def reset(self):
-        self.log.info("Resetting game...")
-        self.nethandler.strsend("RESET|")
-        
-        # Reset all frames
-        self.enemyFrame.destroy()
-        self.friendlyFrame.destroy()
-        self.log.info("Destroied Enemy and Friendly frames.")
-        
-        self.exitFlag = False
-        self.nethandler.exitFlag = False
-        self.gpioHandler.exitFlag = False
-        # Restart Game class setup
-        self.setup()
-
-    
     # Kills all threads by activating exit flags
     def closeThreads(self):
         self.log.info("Executed closeThreads()")
@@ -202,14 +185,16 @@ class Game:
     # Used to end the game without causing thread deadlock
     def endGame(self):
         self.log.info("Ending game...")
-        self.nethandler.exitFlag = True
         self.exitFlag = True
+        self.nethandler.exitFlag = True
+        self.gpioHandler.exitFlag = True
         self.gpioHandler.writeToLCD('Ending Game...')
         self.log.info("All thread exit flags have been raised.")
         self.log.info("Press restart button to continue.")
         while self.gpioHandler.resetFlag == False:
             pass
-        self.reset()
+        self.enemyFrame.destroy()
+        self.friendlyFrame.destroy()
 
 
     # Checks the exitFlag and exits
