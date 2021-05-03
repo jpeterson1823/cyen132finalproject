@@ -64,8 +64,7 @@ class Game:
 
         # Update window to display frames
         self.window.update_idletasks()
-        self.window.update()
-        
+        self.window.update() 
         # Start threads
         self.log.info("Starting game loop thread...")
         self.gameLoopThread.start()
@@ -275,6 +274,8 @@ class Game:
             else:
                 self.clientReadyFlag = True
             self.log.info("Set current machine's ready flag.")
+
+            self.nethandler.strsend("READY_UP|")
 
             
             #Wait for other machine to be ready

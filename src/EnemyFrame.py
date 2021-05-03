@@ -91,7 +91,7 @@ class EnemyFrame(Frame):
                 self.ready = True
     
     # Updates a cell according to the status
-    def __updateCell(self, x, y, status):
+    def updateCell(self, x, y, status):
         if status == 1:
             self.grid[y][x].configure(image=self.HIT_IMG)
         else:

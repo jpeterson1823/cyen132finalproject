@@ -56,10 +56,7 @@ class NetworkHandler:
 
     # Sets up netcode for client machine
     def __clientSetup(self):
-        # Get host's IPv4 from user input
-        self.hostipv4 = input("Client setup initialized. Please enter the host's IPv4: ")
-        while input(f"Entered IPv4: {self.hostipv4}\n Is this correct? (Y/n) ").lower() != 'y':
-            self.hostipv4 = input("Please re-enter the host's IPv4: ")
+        self.hostipv4 = '1.92.168.1.6'
         
         # Create a TCP socket
         self.isock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

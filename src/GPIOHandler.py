@@ -55,25 +55,21 @@ class GPIOHandler:
     def __updateButtonStates(self):
         while self.exitFlag == False:
             if gpio.input(self.start) == gpio.HIGH:
-                print("START")
                 self.startFlag = True
             else:
                 self.startFlag = False
 
             if gpio.input(self.shoot) == gpio.HIGH:
-                print("SHOOT")
                 self.shootFlag = True
             else:
                 self.shootFlag = False
 
             if gpio.input(self.reset) == gpio.HIGH:
-                print("RESET")
                 self.resetFlag = True
             else:
                 self.resetFlag = False
                 
             if gpio.input(self.forfeit) == gpio.HIGH:
-                print("FORFEIT")
                 self.forfeitFlag = True
             else:
                 self.forfeitFlag = False
