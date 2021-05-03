@@ -117,9 +117,9 @@ class GPIOHandler:
 
 
     # Writes string to LCD Screen
-    def writeToLCD(self, string):
+    def writeToLCD(self, string, row=1):
         # Clear the screen
         self.lcd.lcd_clear()
         # Display string
-        self.lcd.lcd_display_string(string, 1)
+        self.lcd.lcd_display_string(string, row)
 

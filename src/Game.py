@@ -77,13 +77,9 @@ class Game:
     # Resets the game to the start
     def reset(self):
         self.log.info("Resetting game...")
-        self.nethandler.strsend("RESETTING")
+        self.nethandler.strsend("RESET|")
         self.endGame()
         self.log.info("Ending game...")
-        self.gameLoopThread.join()
-        self.log.info("Joined gameloop thread with main.")
-        self.nethandler.listenThread.join()
-        self.log.info("Joined listening thread thread with main.")
         
         # Reset all frames
         self.enemyFrame.destroy()
@@ -100,14 +96,6 @@ class Game:
         self.exitFlag = True
         self.nethandler.exitFlag = True
         self.gpioHandler.exitFlag = True
-        self.gameLoopThread.join()
-        self.log.info("Joined game loop thread with main thread.")
-        self.nethandler.listenThread.join()
-        self.log.info("Joined nethandler listen thread with main...")
-        self.gpioHandler.buttonThread.join()
-        self.log.info("Joined gpio handler button thread with main...")
-        self.window.destroy()
-        self.log.info("Destroyed game window.")
 
 
     # Sends the desired shot locations to the other machine when it is the player's turn
@@ -224,13 +212,23 @@ class Game:
         if self.exitFlag:
             self.log.critical("Exit flag has been raised.")
             exit(0)
+        
+    # Checks the GPIO forfeit flag's status and acts accordingly
+    def checkForfeit(self):
+        if self.gpioHandler.forfeitFlag == True:
+            self.nethandler.strsend("LOSS|")
+            self.gpioHandler.writeToLCD("YOU FORFEIT")
+            exit(0)
 
     # General game loop
     def loop(self):
         while True:
+            # Check for win or lose condition
             self.checkWin()
             # Check for exit command
             self.checkExitFlag()
+            # Check for forfeit button
+            self.checkForfeit()
 
             # Enable player input for shots
             self.enemyFrame.enableInput()
@@ -242,6 +240,7 @@ class Game:
                 # Check for exit command
                 self.checkExitFlag()
                 self.checkWin()
+                self.checkForfeit()
 
             self.previousDesiredShots = self.enemyFrame.desiredShots
 
@@ -261,12 +260,14 @@ class Game:
             self.enemyFrame.ready = False
             self.log.info("Disabled player input.")
 
-            self.gpioHandler.writeToLCD("PRESS FIRE BUTTON WHEN READY")
+            self.gpioHandler.writeToLCD("   BOMBARDMENT ARMED")
+            self.gpioHandler.writeToLCD("Fire when ready", 2)
             self.log.info("Waiting on shoot button press...")
             # while the user has not pressed the shoot button
             while self.gpioHandler.shootFlag == False:
                 self.checkExitFlag()
                 self.checkWin()
+                self.checkForfeit()
 
             # Set machine ready flag
             if self.nethandler.machineType == "host":
@@ -284,10 +285,12 @@ class Game:
                 while self.clientReadyFlag == False:
                     self.checkWin()
                     self.checkExitFlag()
+                    self.checkForfeit()
             else:
                 while self.hostReadyFlag == False:
                     self.checkWin()
                     self.checkExitFlag()
+                    self.checkForfeit()
             self.log.info("Received ready flag from other machine")
 
             # Reset ready flags
@@ -300,7 +303,4 @@ class Game:
 
             # Activate warning LEDs
             self.gpioHandler.displayWarning()
-            self.gpioHandler.writeToLCD("INCOMING FIRE!!!")
-
-            # Check for win
-            self.checkWin()
+            self.gpioHandler.writeToLCD("INCOMING FIRE!")
