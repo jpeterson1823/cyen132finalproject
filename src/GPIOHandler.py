@@ -88,14 +88,14 @@ class GPIOHandler:
 
 
     # Updates the shot selection LEDs' status
-    def __updateShotLEDs(self):
+    def updateShotLEDs(self, numShots):
         # Check if LEDs should be turned off
-        if self.shotCounter == 0:
+        if numShots == 0:
             for pin in self.shotLEDs:
                 gpio.output(pin, gpio.LOW)
         # Turns necessary LEDs on
-        for i in range(self.shotCounter):
-            gpio.output(self.shotCounter[i], gpio.HIGH)
+        for i in range(numShots):
+            gpio.output(self.shotLEDs[i], gpio.HIGH)
 
 
     # Creates a thread and flashes the warning LEDs
@@ -119,7 +119,8 @@ class GPIOHandler:
     # Writes string to LCD Screen
     def writeToLCD(self, string, row=1):
         # Clear the screen
-        self.lcd.lcd_clear()
+        if row == 1:
+            self.lcd.lcd_clear()
         # Display string
         self.lcd.lcd_display_string(string, row)
 

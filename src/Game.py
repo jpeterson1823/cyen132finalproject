@@ -203,6 +203,7 @@ class Game:
         self.log.info("Ending game...")
         self.nethandler.exitFlag = True
         self.exitFlag = True
+        self.gpioHandler.writeToLCD('Ending Game...')
         self.log.info("All thread exit flags have been raised.")
         self.log.info("Press restart button to continue.")
 
@@ -233,7 +234,7 @@ class Game:
             # Enable player input for shots
             self.enemyFrame.enableInput()
             self.log.info("Enabled enemyFrame player input.")
-            self.gpioHandler.writeToLCD("CHOOSE YOUR 3 SHOTS")
+            self.gpioHandler.writeToLCD("SELECT TARGETS")
 
             # Wait until player has chosen their 3 shots
             while self.enemyFrame.ready == False:
@@ -241,6 +242,8 @@ class Game:
                 self.checkExitFlag()
                 self.checkWin()
                 self.checkForfeit()
+                # Update shot status leds
+                self.gpioHandler.updateShotLEDs(len(self.enemyFrame.desiredShots))
 
             self.previousDesiredShots = self.enemyFrame.desiredShots
 
@@ -259,8 +262,8 @@ class Game:
             self.enemyFrame.disableInput()
             self.enemyFrame.ready = False
             self.log.info("Disabled player input.")
-
-            self.gpioHandler.writeToLCD("   BOMBARDMENT ARMED")
+            
+            self.gpioHandler.writeToLCD(" CANNONS ARMED")
             self.gpioHandler.writeToLCD("Fire when ready", 2)
             self.log.info("Waiting on shoot button press...")
             # while the user has not pressed the shoot button
@@ -268,6 +271,9 @@ class Game:
                 self.checkExitFlag()
                 self.checkWin()
                 self.checkForfeit()
+
+            # Reset shot status LEDs
+            self.gpioHandler.updateShotLEDs(0)
 
             # Set machine ready flag
             if self.nethandler.machineType == "host":
