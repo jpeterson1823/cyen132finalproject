@@ -2,7 +2,7 @@ import RPi.GPIO as gpio
 from time import sleep
 from threading import Thread
 import logging
-import IC2_LCD_driver.py
+import I2C_LCD_driver
 
 # Handles all GPIO input and output.
 class GPIOHandler:
@@ -17,6 +17,10 @@ class GPIOHandler:
         self.shootFlag = False
         self.resetFlag = False
         self.forfeitFlag = False
+
+        # Create LCD screen object
+        self.lcd = I2C_LCD_driver.lcd()
+        self.lcd.lcd_clear()
 
         # Create button update thread
         self.buttonThread = Thread(target=self.__updateButtonStates)
@@ -114,3 +118,12 @@ class GPIOHandler:
         
         # Turn on necessary LEDs
         self.__updateShotLEDs()
+
+
+    # Writes string to LCD Screen
+    def writeToLCD(self, string):
+        # Clear the screen
+        self.lcd.lcd_clear()
+        # Display string
+        self.lcd.lcd_display_string(string, 1)
+

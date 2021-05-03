@@ -8,7 +8,7 @@ class NetworkHandler:
     def __init__(self, game: 'Game', machineType: str = 'host', autoConnect: bool = False):
         # Create class logger
         self.log = logging.getLogger("NetworkHandler")
-        logging.getLogger("NetworkHandler").setLevel(logging.INFO)
+        logging.getLogger().setLevel(logging.INFO)
 
         # Create game member variable
         self.game = game
@@ -44,8 +44,6 @@ class NetworkHandler:
 
     # Sets up netcode for host machine
     def __hostSetup(self):
-        
-
         # Create listening socket with iport
         self.isock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.isock.bind((self.ipv4, self.iport))
@@ -74,7 +72,7 @@ class NetworkHandler:
         # This next line is for windows developement
         #ipv4 = socket.gethostbyname(socket.gethostname())
         # Convert to string and clean up, then return
-        return ipv4.strip()
+        return ipv4.decode().strip()
 
 
     # Connects to either the host or client

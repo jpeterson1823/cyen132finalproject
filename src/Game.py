@@ -13,7 +13,7 @@ class Game:
     def __init__(self, window):
         # Create class logger
         self.log = logging.getLogger("Game")
-        logging.getLogger("Game").setLevel(logging.INFO)
+        self.log.setLevel(logging.INFO)
 
         # Create flags
         self.exitFlag = False
@@ -137,7 +137,7 @@ class Game:
                 print("ready up host")
                 self.hostReadyFlag = True
         elif data == "LOSS":
-            print("YOU WIN!")
+            self.gpioHandler.writeToLCD("YOU HAVE WON!")
             self.closeThreads()
         elif data[0:3] == "SR:":
             data = data.replace("SR:", "")
@@ -204,7 +204,7 @@ class Game:
         # If every ship part has been hit
         if counter == 17:
             self.nethandler.strsend("LOSS|")
-            print("YOU LOSE!")
+            self.gpioHandler.writeToLCD("YOU HAVE LOST")
             self.endGame()
 
         
@@ -233,6 +233,7 @@ class Game:
             # Enable player input for shots
             self.enemyFrame.enableInput()
             self.log.info("Enabled enemyFrame player input.")
+            self.gpioHandler.writeToLCD("CHOOSE YOUR 3 SHOTS")
 
             # Wait until player has chosen their 3 shots
             while self.enemyFrame.ready == False:
@@ -258,6 +259,7 @@ class Game:
             self.enemyFrame.ready = False
             self.log.info("Disabled player input.")
 
+            self.gpioHandler.writeToLCD("PRESS FIRE BUTTON WHEN READY")
             self.log.info("Waiting on shoot button press...")
             # while the user has not pressed the shoot button
             while self.gpioHandler.shootFlag == False:
@@ -294,6 +296,7 @@ class Game:
 
             # Activate warning LEDs
             self.gpioHandler.displayWarning()
+            self.gpioHandler.writeToLCD("INCOMING FIRE!!!")
 
             # Check for win
             self.checkWin()
