@@ -32,7 +32,7 @@ class Game:
     
     # Sets up the game. Handles creating the connection between
     #   the machine and game loop setup
-    def setup(self, reset=False):
+    def setup(self, resetting=False):
         self.log.info("Started class setup.")
 
         # Set constant for shots per turn
@@ -48,19 +48,27 @@ class Game:
         self.log.info("Created enemy and friendly frames.")
 
         # Create network handler
-        self.nethandler = NetworkHandler(self, machineType="host", resetting=reset)
-        self.log.info("Created network handler.")
+        if not resetting:
+            self.nethandler = NetworkHandler(self, machineType="host", resetting=reset)
+            self.log.info("Created network handler.")
+        else:
+            self.log.info("Resetting, skipped network handler setup...")
 
         # Create GPIO handler
-        self.gpioHandler = GPIOHandler()
-        self.log.info("Created GPIO handler.")
-
+        if not resetting:
+            self.gpioHandler = GPIOHandler()
+            self.log.info("Created GPIO handler.")
+        else:
+            self.log.info("Resetting, skipped gpio handler setup...")
 
         # Establish connection to other machine
-        if self.nethandler.connect():
-            self.log.info("Connection established to other machine.")
+        if not resetting:
+            if self.nethandler.connect():
+                self.log.info("Connection established to other machine.")
+            else:
+                self.log.error("Failed to establish connection to other machine.")
         else:
-            self.log.error("Failed to establish connection to other machine.")
+            self.log.info("Resetting, skipped nethandler connection step...")
 
         # Update window to display frames
         self.window.update_idletasks()
@@ -215,7 +223,7 @@ class Game:
         self.gpioHandler.exitFlag = False
 
         self.log.info("Starting game setup again")
-        self.setup(reset=True)
+        self.setup(resetting=True)
 
 
     # Checks the exitFlag and exits

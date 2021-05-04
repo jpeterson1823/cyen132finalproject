@@ -29,17 +29,14 @@ class NetworkHandler:
         self.ipv4 = self.__getIPv4()
 
         # Setup netcode for either host or client
-        if resetting == False:
-            if machineType == 'client':
-                self.log.info("Starting client setup...")
-                self.__clientSetup()
-                self.log.info("Completed client setup.")
-            else:
-                self.log.info("Starting host setup...")
-                self.__hostSetup()
-                self.log.info("Completed host setup.")
+        if machineType == 'client':
+            self.log.info("Starting client setup...")
+            self.__clientSetup()
+            self.log.info("Completed client setup.")
         else:
-            self.log.info("Reset flag has been passed. Skipping connection attempts...")
+            self.log.info("Starting host setup...")
+            self.__hostSetup(resetting=resetting)
+            self.log.info("Completed host setup.")
 
         # Create listening thread
         self.listenThread = threading.Thread(target=self.listenLoop)
@@ -47,26 +44,26 @@ class NetworkHandler:
         
 
     # Sets up netcode for host machine
-    def __hostSetup(self):
+    def __hostSetup(self, resetting=False):
         # Create listening socket with iport
         self.isock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
+        if resetting == False:
             self.isock.bind((self.ipv4, self.iport))
-        except OSError:
-            self.log.info("ISOCK address already bound, continuing...")
+        else:
+            self.log.info("Reset flag has been waved. Skipping isock binding...")
 
         # Create command socket with oport
         self.osock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
+        if resetting == False:
             self.osock.bind((self.ipv4, self.oport))
-        except OSError:
-            self.log.info("OSOCK address already bound, continuing...")
+        else:
+            self.log.info("Reset flag has been waved. Skipping osock binding...")
 
 
     # Sets up netcode for client machine
     def __clientSetup(self):
+        # Create str for host ip
         self.hostipv4 = '192.168.1.6'
-        
         # Create a TCP socket
         self.isock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.osock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
