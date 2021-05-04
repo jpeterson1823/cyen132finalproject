@@ -84,13 +84,15 @@ class Game:
             self.log.info("Started buttonThread.")
         else:
             self.log.info("Resetting, starting threads...")
-            self.gameLoopThread = threading.Thread(target=self.loop)
-            self.gameLoopThread.start()
-            self.nethandler.listenThread = threading.Thread(target=self.nethandler.listenLoop)
-            self.nethandler.listenThread.start()
-            self.gpioHandler.buttonThread = threading.Thread(target=self.gpioHandler.__updateButtonStates)
-            self.gpioHandler.buttonThread.start()
+            self.restartThreads()
+            self.nethandler.restartThreads()
+            self.gpioHandler.restartThreads()
 
+
+    # Restarts the classes threads
+    def restartThreads(self):
+        self.gameLoopThread = threading.Thread(target=self.loop)
+        self.gameLoopThread.start()
     
     # Kills all threads by activating exit flags
     def closeGame(self):

@@ -42,6 +42,10 @@ class NetworkHandler:
         self.listenThread = threading.Thread(target=self.listenLoop)
         self.log.info("Created listening thread.")
         
+    # Restarts the class's threads
+    def restartThreads(self):
+        self.listenThread = threading.Thread(target=self.listenLoop)
+        self.listenThread.start()
 
     # Sets up netcode for host machine
     def __hostSetup(self, resetting=False):

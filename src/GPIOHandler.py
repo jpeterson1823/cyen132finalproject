@@ -36,6 +36,7 @@ class GPIOHandler:
         # Define LED pins
         self.shotLEDs = [20, 21, 22]
         self.warnLights = 23
+        self.buttonIndicator = 19
         # Define button pins
         self.start   =  24
         self.reset   =  25
@@ -46,33 +47,41 @@ class GPIOHandler:
         gpio.setmode(gpio.BCM)
         self.log.info("Set GPIO mode to BCM.")
         # Set led pins output
-        gpio.setup([20, 21, 22, 23], gpio.OUT)
+        gpio.setup([19, 20, 21, 22, 23], gpio.OUT)
         # Set button pins to input
         gpio.setup([24, 25, 26, 27], gpio.IN)
-
 
     # Checks if any buttons are being pressed
     def __updateButtonStates(self):
         while self.exitFlag == False:
             if gpio.input(self.start) == gpio.HIGH:
                 self.startFlag = True
+                gpio.output(self.buttonIndicator, gpio.HIGH)
             else:
                 self.startFlag = False
+                gpio.output(self.buttonIndicator, gpio.LOW)
 
             if gpio.input(self.shoot) == gpio.HIGH:
                 self.shootFlag = True
+                gpio.output(self.buttonIndicator, gpio.HIGH)
             else:
                 self.shootFlag = False
+                gpio.output(self.buttonIndicator, gpio.LOW)
 
             if gpio.input(self.reset) == gpio.HIGH:
                 self.resetFlag = True
+                gpio.output(self.buttonIndicator, gpio.HIGH)
             else:
                 self.resetFlag = False
+                gpio.output(self.buttonIndicator, gpio.LOW)
                 
             if gpio.input(self.forfeit) == gpio.HIGH:
                 self.forfeitFlag = True
+                gpio.output(self.buttonIndicator, gpio.HIGH)
             else:
                 self.forfeitFlag = False
+                gpio.output(self.buttonIndicator, gpio.LOW)
+
         self.log.critical("Exit flag raised.")
         sleep(0.25)
 
@@ -85,6 +94,12 @@ class GPIOHandler:
             sleep(delay)
             gpio.output(self.warnLights, gpio.LOW)
             sleep(delay)
+
+
+    # Restarts the classes threads
+    def restartThreads(self):
+        self.buttonThread = Thread(target=self.__updateButtonStates)
+        self.buttonThread.start()
 
 
     # Updates the shot selection LEDs' status
