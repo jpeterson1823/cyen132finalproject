@@ -15,23 +15,15 @@ window.title("BATTLESHIP: PI EDITION")
 # Create game object
 game = Game(window)
 
-# Start main loop
-
 try:
-    while True:
-        if game.exitFlag == True:
-            logging.info("Joining gameLoopThread with main...")
-            game.gameLoopThread.join()
-            logging.info("Joining listenThread with main...")
-            game.nethandler.listenThread.join()
-            logging.info("Joining buttonThread with main...")
-            game.gpioHandler.buttonThread.join()
-
-            logging.info("Creating new game instance...")
-            game = Game(window)
-
-        window.update_idletasks()
-        window.update()
+    # Start main loop
+    window.mainloop()
 except KeyboardInterrupt:
-    print('exiting')
-    exit(1)
+    game.exitFlag = True
+    game.nethandler.exitFlag = True
+    game.gpioHandler.exitFlag = True
+    game.nethandler.isock.close()
+    game.nethandler.osock.close()
+    if game.nethandler.machineType == 'host':
+        game.nethandler.oconnection.close()
+        game.nethandler.iconnection.close()

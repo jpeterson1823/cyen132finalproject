@@ -21,7 +21,7 @@ class Game:
         self.clientReadyFlag = False
 
         # Add Tkinter protocol to stop all parallel threads when closed
-        window.protocol("WM_DELETE_WINDOW", self.closeThreads)
+        window.protocol("WM_DELETE_WINDOW", self.closeGame)
 
         # Store window in class member variable
         self.window = window
@@ -32,7 +32,7 @@ class Game:
     
     # Sets up the game. Handles creating the connection between
     #   the machine and game loop setup
-    def setup(self):
+    def setup(self, reset=False):
         self.log.info("Started class setup.")
 
         # Set constant for shots per turn
@@ -48,7 +48,7 @@ class Game:
         self.log.info("Created enemy and friendly frames.")
 
         # Create network handler
-        self.nethandler = NetworkHandler(self, machineType="host")
+        self.nethandler = NetworkHandler(self, machineType="host", resetting=reset)
         self.log.info("Created network handler.")
 
         # Create GPIO handler
@@ -75,11 +75,16 @@ class Game:
 
     
     # Kills all threads by activating exit flags
-    def closeThreads(self):
-        self.log.info("Executed closeThreads()")
+    def closeGame(self):
+        self.log.info("Executed closeGame()")
         self.exitFlag = True
         self.nethandler.exitFlag = True
         self.gpioHandler.exitFlag = True
+        self.nethandler.osock.close()
+        self.nethandler.isock.close()
+        if self.nethandler.machineType == 'host':
+            self.nethandler.oconnection.close()
+            self.nethandler.iconnection.close()
 
 
     # Sends the desired shot locations to the other machine when it is the player's turn
@@ -112,7 +117,7 @@ class Game:
                 self.hostReadyFlag = True
         elif data == "LOSS":
             self.gpioHandler.writeToLCD("YOU HAVE WON!")
-            self.closeThreads()
+            self.endGame()
         elif data[0:3] == "SR:":
             data = data.replace("SR:", "")
             self.showShots(data)
@@ -185,16 +190,32 @@ class Game:
     # Used to end the game without causing thread deadlock
     def endGame(self):
         self.log.info("Ending game...")
+        self.gpioHandler.writeToLCD('Ending Game...')
+        self.log.info("Press restart button to continue.")
+        self.gpioHandler.writeToLCD("Press RESTART to")
+        self.gpioHandler.writeToLCD("   play again!", 2)
+        while self.gpioHandler.resetFlag == False:
+            pass
+        self.__reset()
+
+    def __reset(self):
+        self.gpioHandler.writeToLCD("RESTARTING...")
         self.exitFlag = True
         self.nethandler.exitFlag = True
         self.gpioHandler.exitFlag = True
-        self.gpioHandler.writeToLCD('Ending Game...')
-        self.log.info("All thread exit flags have been raised.")
-        self.log.info("Press restart button to continue.")
-        while self.gpioHandler.resetFlag == False:
-            pass
+        self.log.info("Sleeping for 2 sec...")
+        sleep(2)
         self.enemyFrame.destroy()
         self.friendlyFrame.destroy()
+        sleep(2)
+
+        self.log.info("Resetting flags")
+        self.exitFlag = False
+        self.nethandler.exitFlag = False
+        self.gpioHandler.exitFlag = False
+
+        self.log.info("Starting game setup again")
+        self.setup(reset=True)
 
 
     # Checks the exitFlag and exits
