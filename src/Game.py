@@ -136,7 +136,12 @@ class Game:
                 print("ready up host")
                 self.hostReadyFlag = True
         elif data == "LOSS":
-            self.gpioHandler.writeToLCD("YOU HAVE WON!")
+            self.gpioHandler.writeToLCD("ENEMY DESTROIED!")
+            self.gpioHandler.writeToLCD("    YOU WIN!", 2)
+            self.endGame()
+        elif data == "FORFEIT":
+            self.gpioHandler.writeToLCD("OPPONENT FORFEIT")
+            self.gpioHandler.writeToLCD("    YOU WIN!", 2)
             self.endGame()
         elif data[0:3] == "SR:":
             data = data.replace("SR:", "")
@@ -247,7 +252,7 @@ class Game:
     # Checks the GPIO forfeit flag's status and acts accordingly
     def checkForfeit(self):
         if self.gpioHandler.forfeitFlag == True:
-            self.nethandler.strsend("LOSS|")
+            self.nethandler.strsend("FORFEIT|")
             self.gpioHandler.writeToLCD("YOU FORFEIT")
             self.endGame()
             exit(0)
