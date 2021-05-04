@@ -49,7 +49,7 @@ class Game:
 
         # Create network handler
         if not resetting:
-            self.nethandler = NetworkHandler(self, machineType="host", resetting=reset)
+            self.nethandler = NetworkHandler(self, machineType="host", resetting=resetting)
             self.log.info("Created network handler.")
         else:
             self.log.info("Resetting, skipped network handler setup...")
@@ -73,13 +73,23 @@ class Game:
         # Update window to display frames
         self.window.update_idletasks()
         self.window.update() 
-        # Start threads
-        self.log.info("Starting game loop thread...")
-        self.gameLoopThread.start()
-        self.log.info("Starting listen loop thread...")
-        self.nethandler.listenThread.start()
-        self.gpioHandler.buttonThread.start()
-        self.log.info("Started buttonThread.")
+
+        if not resetting:
+            # Start threads
+            self.log.info("Starting game loop thread...")
+            self.gameLoopThread.start()
+            self.log.info("Starting listen loop thread...")
+            self.nethandler.listenThread.start()
+            self.gpioHandler.buttonThread.start()
+            self.log.info("Started buttonThread.")
+        else:
+            self.log.info("Resetting, starting threads...")
+            self.gameLoopThread = threading.Thread(target=self.loop)
+            self.gameLoopThread.start()
+            self.nethandler.listenThread = threading.Thread(target=self.nethandler.listenLoop)
+            self.nethandler.listenThread.start()
+            self.gpioHandler.buttonThread = threading.Thread(target=self.gpioHandler.__updateButtonStates)
+            self.gpioHandler.buttonThread.start()
 
     
     # Kills all threads by activating exit flags
