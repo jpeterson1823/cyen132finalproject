@@ -136,12 +136,16 @@ class Game:
                 print("ready up host")
                 self.hostReadyFlag = True
         elif data == "LOSS":
+            self.exitFlag = True
             self.gpioHandler.writeToLCD("ENEMY DESTROIED!")
             self.gpioHandler.writeToLCD("    YOU WIN!", 2)
+            sleep(1)
             self.endGame()
         elif data == "FORFEIT":
+            self.exitFlag = True
             self.gpioHandler.writeToLCD("OPPONENT FORFEIT")
             self.gpioHandler.writeToLCD("    YOU WIN!", 2)
+            sleep(1)
             self.endGame()
         elif data[0:3] == "SR:":
             data = data.replace("SR:", "")
