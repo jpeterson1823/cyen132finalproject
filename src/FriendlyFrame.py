@@ -13,7 +13,7 @@ class FriendlyFrame(Frame):
         self.parent = parent
         
         Frame.__init__(self, parent, bg="blue", width=400, height=480)
-        self.shipMap = self.getFormattedMap()
+        self.shipMap = self.__getFormattedMap()
         self.setup()
         self.preGame = True
     
@@ -78,7 +78,7 @@ class FriendlyFrame(Frame):
         # initalize grid full of buttons
         self.shipGridButtons = [[Button(self, image=self.TILE_IMG, bd=0, 
                                 highlightthickness=0, relief=FLAT, bg='black',
-                                command=lambda x=col, y=row:self.process(x, y)) 
+                                command=lambda x=col, y=row:self.__process(x, y)) 
                                 for row in range(10)] for col in range(10)]
         
         # Add buttons to frame
@@ -88,13 +88,13 @@ class FriendlyFrame(Frame):
                 self.shipGridButtons[i][j].grid(row=i, column=j, sticky=N+E+S+W)
 
         # create map for placing ships
-        self.placeShips()
+        self.__placeShips()
 
         # Pack frame
         self.pack(side=LEFT, fill=X, expand=1, anchor=E)
     
     # Loads the premade map
-    def getFormattedMap(self):
+    def __getFormattedMap(self):
         rawMap = open("../testmaps/a.map").readlines()
         formattedMap = []
         for line in rawMap:
@@ -105,18 +105,18 @@ class FriendlyFrame(Frame):
         return formattedMap
 
     # Places all the ship tiles based on a premade map
-    def placeShips(self):
+    def __placeShips(self):
         for row in range(len(self.shipMap)):
             for cell in range(len(self.shipMap)):
                 if self.shipMap[row][cell] == 'o':
-                    self.shipGridButtons[row][cell].configure(image=self.determineCellSprite(row, cell))
+                    self.shipGridButtons[row][cell].configure(image=self.__determineCellSprite(row, cell))
 
     # Determines the sprite of the current cell
-    def determineCellSprite(self, row, cell):
-        above = self.checkCellAbove(row, cell)
-        below = self.checkCellBelow(row, cell)
-        right = self.checkCellRight(row, cell)
-        left = self.checkCellLeft(row, cell)
+    def __determineCellSprite(self, row, cell):
+        above = self.__checkCellAbove(row, cell)
+        below = self.__checkCellBelow(row, cell)
+        right = self.__checkCellRight(row, cell)
+        left = self.__checkCellLeft(row, cell)
 
         if above and below:
             return self.SHIP_MID_VERTICAL
@@ -134,7 +134,7 @@ class FriendlyFrame(Frame):
 
     # Checks above the cell of a ship pane
     # Used to decide what sprite should be used
-    def checkCellAbove(self, row, cell):
+    def __checkCellAbove(self, row, cell):
         if row != 0:
             # If ship cell has another ship cell above
             if self.shipMap[row-1][cell] == 'o':
@@ -143,7 +143,7 @@ class FriendlyFrame(Frame):
     
     # Checks below the cell of a ship pane
     # Used to decide what sprite should be used
-    def checkCellBelow(self, row, cell):
+    def __checkCellBelow(self, row, cell):
         if row != 9:
             if self.shipMap[row+1][cell] == 'o':
                 return True
@@ -151,7 +151,7 @@ class FriendlyFrame(Frame):
     
     # Checks to the right of a cell ship pane
     # Used to decide what sprite should be used
-    def checkCellRight(self, row, cell):
+    def __checkCellRight(self, row, cell):
         if cell != 9:
             if self.shipMap[row][cell+1] == 'o':
                 return True
@@ -159,19 +159,38 @@ class FriendlyFrame(Frame):
     
     # Checks to the left for a cell ship pane
     # Used to decide what sprite should be used
-    def checkCellLeft(self, row, cell):
+    def __checkCellLeft(self, row, cell):
         if cell != 0:
             if self.shipMap[row][cell-1] == 'o':
                 return True
         return False
 
     # Changes the sprite of the cell to hit
-    def hitCell(self, x, y):
+    def __hitCell(self, x, y):
         self.shipGridButtons[y][x].configure(image=self.HIT_IMG)
         self.shipMap[y][x] = 'x'
         self.parent.update_idletasks()
         self.parent.update()
     
-    # Filler Code for processing press of ship buttons
-    def process(self, x, y):
+    # Filler Code for __processing press of ship buttons
+    def __process(self, x, y):
         self.log.info(f"Button pressed ({x},{y})")
+
+    # Checks the friendlyFrame board for a hit and updates the image
+    def checkHits(self, data):
+        self.log.info("Checking hits...")
+        hitmiss = []
+        for coordstr in data.split(";"):
+            print(coordstr)
+            temp = coordstr.split(',')
+            x = int(temp[0])
+            y = int(temp[1])
+            print(self.shipMap[y][x])
+            if self.shipMap[y][x] != '-':
+                print('hit')
+                hitmiss.append(True)
+                self.hitCell(x, y)
+            else:
+                hitmiss.append(False)
+        self.log.info("Set hits if there were any.")
+        return hitmiss

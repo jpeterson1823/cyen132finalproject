@@ -1,6 +1,7 @@
 from tkinter import *
 from Game import Game
 import logging
+import RPi.GPIO as gpio
 
 logging.getLogger().setLevel(logging.INFO)
 logging.info("Starting main script...")
@@ -18,12 +19,17 @@ game = Game(window)
 try:
     # Start main loop
     window.mainloop()
-except KeyboardInterrupt:
+except:
     game.exitFlag = True
     game.nethandler.exitFlag = True
     game.gpioHandler.exitFlag = True
     game.nethandler.isock.close()
     game.nethandler.osock.close()
     if game.nethandler.machineType == 'host':
-        game.nethandler.oconnection.close()
-        game.nethandler.iconnection.close()
+        try:
+            game.nethandler.oconnection.close()
+            game.nethandler.iconnection.close()
+        except:
+            pass
+    gpio.clean()
+    exit(1)
