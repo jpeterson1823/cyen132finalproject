@@ -1,8 +1,24 @@
 from tkinter import *
 from random import randint
-import socket
+import time
 
-SHIP_SIZES = {"Carrier" : 5, "Battleship" : 4, "Cruiser" : 3, "Submarine" : 3, "Destroyer" : 2}
+global STARTB, RESETB
+STARTB = 20
+RESETB = 21
+
+class WelcomeFrame(Frame):
+    def __init__(self, parent):
+        Frame.__init__(self, parent, bg="blue", width=1000, height=500)
+        parent.attributes('-fullscreen', False)
+        self.setup()
+
+    def setup(self):
+        titleText = open("titleText.txt", 'r').read()
+        self.title = Label(self, text=titleText, anchor=CENTER, 
+                            bg='blue', height=2, font=('Arial', 12), foreground='white')
+        self.title.grid(row=0,column=0, sticky=N+E+S+W)
+        self.pack()
+    
 
 # Shows all shots taken by the player and if they were a hit or miss
 class ShotFrame(Frame):
@@ -48,6 +64,7 @@ class ShipFrame(Frame):
         Frame.__init__(self, parent, bg="blue", width=500, height=500)
         parent.attributes("-fullscreen", False)
         self.shipMap = self.getFormattedMap()
+        self.alreadyPlaced = [[False for x in range(10)] for _ in range(10)]
         self.setup()
         self.current_ship = "Carrier"
         self.preGame = True
@@ -90,7 +107,7 @@ class ShipFrame(Frame):
     
     
     def getFormattedMap(self):
-        rawMap = open("testmaps/a.map").readlines()
+        rawMap = open("testmaps/test.txt").readlines()
         formattedMap = []
         for line in rawMap:
             row = []
@@ -103,8 +120,11 @@ class ShipFrame(Frame):
     def placeShips(self):
         for row in range(len(self.shipMap)):
             for cell in range(len(self.shipMap)):
-                if self.shipMap[row][cell] == 'o':
+                if self.shipMap[row][cell] == 'o' and self.alreadyPlaced[row][cell] == False:
                     self.shipGridButtons[row][cell].configure(image=self.determineCellSprite(row, cell))
+                    self.alreadyPlaced[row][cell] = True
+                elif self.shipMap[row][cell] == 'o' and self.alreadyPlaced[row][cell] == True:
+                    print(f"Sprite already placed at ({row}, {cell}).")
 
     
 
@@ -114,6 +134,7 @@ class ShipFrame(Frame):
         right = self.checkCellRight(row, cell)
         left = self.checkCellLeft(row, cell)
 
+        # Logic does not work if other ships' parts are directly next to eachother
         if above and below:
             return self.SHIP_MID_VERTICAL
         elif above and not below:
@@ -159,11 +180,42 @@ class ShipFrame(Frame):
         print(f"ShipFrame: ({x},{y})")
 
 
+class Game():
+    def __init__(self, window):
+        # Start intro
+        welcome = WelcomeFrame(window)
+        window.update_idletasks()
+        window.update()
+        time.sleep(5)
+        welcome.destroy()
+        window.update_idletasks()
+        window.update()
+
+        # Start rest of game
+        self.shotFrame = ShotFrame(window)
+        self.shipFrame = ShipFrame(window)
+        self.window = window
+        self.startGameLoop()
+        
+    
+    def reset(self):
+        self.shotFrame.destroy()
+        self.shotFrame = ShotFrame(self.window)
+        self.shipFrame.destroy()
+        self.shipFrame = ShipFrame(self.window)
+    
+    def startGameLoop(self):
+        while True:
+            try:
+                self.window.update_idletasks()
+                self.window.update()
+            except:
+                print("Window Manually Closed.")
+                exit()
+
+
 def main():
-    window = Tk()
-    ShipFrame(window)
-    ShotFrame(window)
-    window.mainloop()
+    Game(Tk())
 
 if __name__ == "__main__":
     main()
