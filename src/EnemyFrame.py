@@ -54,7 +54,7 @@ class EnemyFrame(Frame):
             for col in range(10):
                 button = Button(self, image=self.TILE_IMG, bd=0,
                         highlightthickness=0, relief=FLAT, bg='black',
-                        command=lambda x=col, y=row: self.__process(x, y))
+                        command=lambda x=col, y=row: self.process(x, y))
                 rowList.append(button)
             self.grid.append(rowList)
         
@@ -80,7 +80,7 @@ class EnemyFrame(Frame):
     # Adds up to 3 shots to an array. Once the maximum amount
     #   of shots have been placed, it then passes the info to
     #   the game class.
-    def __process(self, x, y):
+    def process(self, x, y):
         if self.inputEnabled:
             if len(self.desiredShots) < self.game.SHOTS_PER_TURN:
                 self.log.info("Recorded desired shot")
@@ -91,22 +91,10 @@ class EnemyFrame(Frame):
                 self.ready = True
     
     # Updates a cell according to the status
-    def __updateCell(self, x, y, status):
+    def updateCell(self, x, y, status):
         if status == 1:
             self.grid[y][x].configure(image=self.HIT_IMG)
         else:
             self.grid[y][x].configure(image=self.MISS_IMG)
         self.parent.update_idletasks()
         self.parent.update()
-
-    
-    # Updates frame to show if player's shots were a hit or miss
-    def showShots(self, data):
-        shotCounter = 0
-        for status in data.split(';'):
-            coord = self.previousDesiredShots[shotCounter]
-            if status == '1':
-                self.__updateCell(coord[0], coord[1], 1)
-            else:
-                self.__updateCell(coord[0], coord[1], 0)
-            shotCounter += 1
