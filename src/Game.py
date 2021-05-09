@@ -75,12 +75,14 @@ class Game:
 
         # Create and display start frame
         self.startFrame = StartFrame(self.window)
-        self.window.update_idletasks()
-        self.window.update() 
+        #self.window.update_idletasks()
+        #self.window.update() 
 
         self.log.info("Created start frame. Waiting for start button...")
         while self.gpioHandler.startFlag == False:
-            pass
+            self.startFrame.animate()
+            self.window.update_idletasks()
+            self.window.update()
 
         self.log.info("Start button pressed. Continuing with game setup...")
         self.startFrame.destroy()
@@ -282,6 +284,7 @@ class Game:
     # General game loop
     def loop(self):
         while True:
+            sleep(0.05)
             # Check for win or lose condition
             self.checkWin()
             # Check for exit command
@@ -302,6 +305,7 @@ class Game:
                 self.checkForfeit()
                 # Update shot status leds
                 self.gpioHandler.updateShotLEDs(len(self.enemyFrame.desiredShots))
+            self.gpioHandler.updateShotLEDs(len(self.enemyFrame.desiredShots))
 
             self.previousDesiredShots = self.enemyFrame.desiredShots
 

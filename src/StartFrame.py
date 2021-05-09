@@ -42,8 +42,8 @@ class StartFrame(Canvas):
         self.frame = 0
         
         self.pack()
-
-        self.__animate()
+        
+        self.animate()
 
     # Loads start frames into memory
     def __loadStartFrames(self):
@@ -71,7 +71,7 @@ class StartFrame(Canvas):
         self.lastFrame = len(self.frames) - 1
     
     # Animates the start button
-    def __animate(self):
+    def animate(self):
         # Check if at last frame and update reverse accordingly
         if self.frame == self.lastFrame:
             self.reverse = True
@@ -89,5 +89,6 @@ class StartFrame(Canvas):
         self.itemconfigure('start', image=self.frames[self.frame])
 
         # Sleep to show animation
-        print('changed frame')
-        self.after(50, self.__animate)
+        sleep(0.025)
+        print("Updated Frame")
+        #self.after(50, self.__animate)
