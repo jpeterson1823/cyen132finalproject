@@ -66,28 +66,22 @@ class Game:
         self.gameLoopThread = threading.Thread(target=self.loop)
         self.log.info("Created game loop thread.")
 
-        # Start threads
+        # Start GPIO handler thread
         if not resetting:
-            self.log.info("Starting game loop thread...")
-            self.gameLoopThread.start()
-            self.log.info("Starting listen loop thread...")
-            self.nethandler.listenThread.start()
             self.gpioHandler.buttonThread.start()
             self.log.info("Started buttonThread.")
         else:
-            self.log.info("Resetting, starting threads...")
-            self.restartThreads()
-            self.nethandler.restartThreads()
             self.gpioHandler.restartThreads()
 
         # Create and display start frame
-        self.startFrame = StartFrame(self.window, self.gpioHandler)
+        self.startFrame = StartFrame(self.window)
         self.window.update_idletasks()
         self.window.update() 
 
         self.log.info("Created start frame. Waiting for start button...")
         while self.gpioHandler.startFlag == False:
             pass
+
         self.log.info("Start button pressed. Continuing with game setup...")
         self.startFrame.destroy()
         self.log.info("Destroied StartFrame.")
@@ -97,6 +91,18 @@ class Game:
         self.friendlyFrame = FriendlyFrame(self.window)
         self.log.info("Created enemy and friendly frames.")
 
+        # Start threads
+        if not resetting:
+            self.log.info("Starting game loop thread...")
+            self.gameLoopThread.start()
+            self.log.info("Starting listen loop thread...")
+            self.nethandler.listenThread.start()
+        else:
+            self.log.info("Resetting, starting threads...")
+            self.restartThreads()
+            self.nethandler.restartThreads()
+
+        
         # Update window to show new frames
         self.window.update_idletasks()
         self.window.update()
