@@ -54,6 +54,7 @@ class GPIOHandler:
     # Checks if any buttons are being pressed
     def __updateButtonStates(self):
         while self.exitFlag == False:
+            sleep(0.1)
             if gpio.input(self.start) == gpio.HIGH:
                 self.startFlag = True
                 gpio.output(self.buttonIndicator, gpio.HIGH)

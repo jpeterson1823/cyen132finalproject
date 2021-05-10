@@ -15,7 +15,7 @@ class NetworkHandler:
         self.game = game
 
         # Set timeout time to 10s
-        socket.setdefaulttimeout(5)
+        socket.setdefaulttimeout(15)
 
         # Create exit flag for killing threads
         self.exitFlag = False
@@ -67,7 +67,7 @@ class NetworkHandler:
     # Sets up netcode for client machine
     def __clientSetup(self):
         # Create str for host ip
-        self.hostipv4 = '192.168.1.6'
+        self.hostipv4 = '192.168.0.101'
         # Create a TCP socket
         self.isock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.osock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

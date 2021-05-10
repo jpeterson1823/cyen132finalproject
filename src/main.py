@@ -1,4 +1,5 @@
 from tkinter import *
+from StartFrame import StartFrame
 from Game import Game
 import logging
 
@@ -9,6 +10,7 @@ logging.info("Starting main script...")
 window = Tk()
 # Set full screen
 window.attributes('-fullscreen', True)
+window.configure(bg='black')
 #set title
 window.title("BATTLESHIP: PI EDITION")
 

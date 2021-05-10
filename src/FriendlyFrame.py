@@ -95,7 +95,7 @@ class FriendlyFrame(Frame):
     
     # Loads the premade map
     def getFormattedMap(self):
-        rawMap = open("../testmaps/a.map").readlines()
+        rawMap = open("../testmaps/b.map").readlines()
         formattedMap = []
         for line in rawMap:
             row = []
@@ -169,6 +169,13 @@ class FriendlyFrame(Frame):
     def hitCell(self, x, y):
         self.shipGridButtons[y][x].configure(image=self.HIT_IMG)
         self.shipMap[y][x] = 'x'
+        self.parent.update_idletasks()
+        self.parent.update()
+    
+    # Changes the sprite of the cell to miss
+    def missCell(self, x, y):
+        self.shipGridButtons[y][x].configure(image=self.MISS_IMG)
+        self.shipMap[y][x] = 'm'
         self.parent.update_idletasks()
         self.parent.update()
     

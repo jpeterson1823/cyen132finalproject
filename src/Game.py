@@ -3,6 +3,7 @@ import logging
 import threading
 from time import sleep
 
+from StartFrame import StartFrame
 from EnemyFrame import EnemyFrame
 from FriendlyFrame import FriendlyFrame
 from GPIOHandler import GPIOHandler
@@ -38,15 +39,6 @@ class Game:
         # Set constant for shots per turn
         self.SHOTS_PER_TURN = 3
 
-        # Create game loop thread
-        self.gameLoopThread = threading.Thread(target=self.loop)
-        self.log.info("Created game loop thread.")
-
-        # Create enemy and friendly ship frames
-        self.enemyFrame = EnemyFrame(self, self.window)
-        self.friendlyFrame = FriendlyFrame(self.window)
-        self.log.info("Created enemy and friendly frames.")
-
         # Create network handler
         if not resetting:
             self.nethandler = NetworkHandler(self, machineType="host", resetting=resetting)
@@ -70,24 +62,52 @@ class Game:
         else:
             self.log.info("Resetting, skipped nethandler connection step...")
 
-        # Update window to display frames
-        self.window.update_idletasks()
-        self.window.update() 
+        # Create game loop thread
+        self.gameLoopThread = threading.Thread(target=self.loop)
+        self.log.info("Created game loop thread.")
 
+        # Start GPIO handler thread
         if not resetting:
-            # Start threads
+            self.gpioHandler.buttonThread.start()
+            self.log.info("Started buttonThread.")
+        else:
+            self.gpioHandler.restartThreads()
+
+        # Create and display start frame
+        self.startFrame = StartFrame(self.window)
+        #self.window.update_idletasks()
+        #self.window.update() 
+
+        self.log.info("Created start frame. Waiting for start button...")
+        while self.gpioHandler.startFlag == False:
+            self.startFrame.animate()
+            self.window.update_idletasks()
+            self.window.update()
+
+        self.log.info("Start button pressed. Continuing with game setup...")
+        self.startFrame.destroy()
+        self.log.info("Destroied StartFrame.")
+
+        # Create enemy and friendly frames
+        self.enemyFrame = EnemyFrame(self, self.window)
+        self.friendlyFrame = FriendlyFrame(self.window)
+        self.log.info("Created enemy and friendly frames.")
+
+        # Start threads
+        if not resetting:
             self.log.info("Starting game loop thread...")
             self.gameLoopThread.start()
             self.log.info("Starting listen loop thread...")
             self.nethandler.listenThread.start()
-            self.gpioHandler.buttonThread.start()
-            self.log.info("Started buttonThread.")
         else:
             self.log.info("Resetting, starting threads...")
             self.restartThreads()
             self.nethandler.restartThreads()
-            self.gpioHandler.restartThreads()
 
+        
+        # Update window to show new frames
+        self.window.update_idletasks()
+        self.window.update()
 
     # Restarts the classes threads
     def restartThreads(self):
@@ -186,6 +206,7 @@ class Game:
                 self.friendlyFrame.hitCell(x, y)
             else:
                 hitmiss.append(False)
+                self.friendlyFrame.missCell(x, y)
         self.log.info("Set hits if there were any.")
         return hitmiss
 
@@ -212,7 +233,9 @@ class Game:
         # If every ship part has been hit
         if counter == 17:
             self.nethandler.strsend("LOSS|")
-            self.gpioHandler.writeToLCD("YOU HAVE LOST")
+            self.gpioHandler.writeToLCD("NO SHIPS REMAIN!")
+            self.gpioHandler.writeToLCD("    YOU LOSE", 2)
+            sleep(1)
             self.endGame()
 
         
@@ -258,12 +281,14 @@ class Game:
         if self.gpioHandler.forfeitFlag == True:
             self.nethandler.strsend("FORFEIT|")
             self.gpioHandler.writeToLCD("YOU FORFEIT")
+            sleep(1)
             self.endGame()
             exit(0)
 
     # General game loop
     def loop(self):
         while True:
+            sleep(0.05)
             # Check for win or lose condition
             self.checkWin()
             # Check for exit command
@@ -284,6 +309,7 @@ class Game:
                 self.checkForfeit()
                 # Update shot status leds
                 self.gpioHandler.updateShotLEDs(len(self.enemyFrame.desiredShots))
+            self.gpioHandler.updateShotLEDs(len(self.enemyFrame.desiredShots))
 
             self.previousDesiredShots = self.enemyFrame.desiredShots
 
@@ -326,6 +352,8 @@ class Game:
 
             
             #Wait for other machine to be ready
+            self.gpioHandler.writeToLCD("Waiting on other")
+            self.gpioHandler.writeToLCD("    Player...", 2)
             self.log.info("Waiting for other machine's ready flag...")
             if self.nethandler.machineType == "host":
                 while self.clientReadyFlag == False:
@@ -350,3 +378,4 @@ class Game:
             # Activate warning LEDs
             self.gpioHandler.displayWarning()
             self.gpioHandler.writeToLCD("INCOMING FIRE!")
+            sleep(1)
