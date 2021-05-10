@@ -6,4 +6,7 @@ window.attributes('-fullscreen', True)
 
 start = StartFrame(window)
 
-window.mainloop()
+while True:
+    start.animate()
+    window.update()
+    window.update_idletasks()

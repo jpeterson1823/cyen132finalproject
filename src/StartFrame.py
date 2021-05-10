@@ -90,5 +90,3 @@ class StartFrame(Canvas):
 
         # Sleep to show animation
         sleep(0.025)
-        print("Updated Frame")
-        #self.after(50, self.__animate)

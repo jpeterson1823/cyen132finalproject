@@ -206,6 +206,7 @@ class Game:
                 self.friendlyFrame.hitCell(x, y)
             else:
                 hitmiss.append(False)
+                self.friendlyFrame.missCell(x, y)
         self.log.info("Set hits if there were any.")
         return hitmiss
 
@@ -232,7 +233,9 @@ class Game:
         # If every ship part has been hit
         if counter == 17:
             self.nethandler.strsend("LOSS|")
-            self.gpioHandler.writeToLCD("YOU HAVE LOST")
+            self.gpioHandler.writeToLCD("NO SHIPS REMAIN!")
+            self.gpioHandler.writeToLCD("    YOU LOSE", 2)
+            sleep(1)
             self.endGame()
 
         
@@ -278,6 +281,7 @@ class Game:
         if self.gpioHandler.forfeitFlag == True:
             self.nethandler.strsend("FORFEIT|")
             self.gpioHandler.writeToLCD("YOU FORFEIT")
+            sleep(1)
             self.endGame()
             exit(0)
 
@@ -348,6 +352,8 @@ class Game:
 
             
             #Wait for other machine to be ready
+            self.gpioHandler.writeToLCD("Waiting on other")
+            self.gpioHandler.writeToLCD("    Player...", 2)
             self.log.info("Waiting for other machine's ready flag...")
             if self.nethandler.machineType == "host":
                 while self.clientReadyFlag == False:
@@ -372,3 +378,4 @@ class Game:
             # Activate warning LEDs
             self.gpioHandler.displayWarning()
             self.gpioHandler.writeToLCD("INCOMING FIRE!")
+            sleep(1)

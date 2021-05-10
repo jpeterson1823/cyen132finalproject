@@ -43,7 +43,7 @@ class EnemyFrame(Frame):
         self.HIT_IMG = ImageTk.PhotoImage(img)
 
         #self.MISS_IMG = PhotoImage(file="../sprites/miss2.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
-        img = Image.open("../sprites/miss2.png")
+        img = Image.open("../sprites/miss2_enemy.png")
         img = img.resize((width, height), Image.ANTIALIAS)
         self.MISS_IMG = ImageTk.PhotoImage(img)
 
