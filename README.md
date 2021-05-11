@@ -41,3 +41,25 @@ A red pin on the cell you selected means you have hit a part of a ship.
 A white pin on the cell you selected means you have missed a ship entirely.
 
 To forfeit a match, simply press the FORFEIT button on the BATTLESHIP unit.
+
+## Hardware Needed (Per Device)
+Electronic Components:
+* Raspberry Pi 4
+* Raspberry Pi 4 Touchscreen capable display
+* Large breadboard
+* Raspberry Pi breadboard pinout attachment and ribbon cable
+* A router with built-in access point (no modem is needed)
+* I2C capable LCD display
+* 5 common annode or cathode 4-pin RGB LEDs
+* 4 nice-looking, different colored buttons (preferably ones that have pre-soldered wires attached)
+
+Wires:
+* Male to Male breadboard jumper wires
+* Female to Female breadboard jumper wires
+* Male to Female breadboard jumper wires
+* Wire crimps that will fit your jumper wires and button wires
+
+Tools:
+* Wire crimper
+* Wire stripper
+* Neddle-nose pliers
