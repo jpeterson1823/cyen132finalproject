@@ -37,6 +37,10 @@ class EnemyFrame(Frame):
         img = img.resize((width, height), Image.ANTIALIAS)
         self.TILE_IMG = ImageTk.PhotoImage(img)
 
+        img = Image.open("../sprites/enemy_tile_selected.png")
+        img = img.resize((width, height), Image.ANTIALIAS)
+        self.SELECTED_IMG = ImageTk.PhotoImage(img)
+
         #self.HIT_IMG = PhotoImage(file="../sprites/hit2.png").subsample(RESCALE_MODIFIER, RESCALE_MODIFIER)
         img = Image.open("../sprites/hit2_enemy.png")
         img = img.resize((width, height), Image.ANTIALIAS)
@@ -53,7 +57,7 @@ class EnemyFrame(Frame):
             rowList = []
             for col in range(10):
                 button = Button(self, image=self.TILE_IMG, bd=0,
-                        highlightthickness=0, relief=FLAT, bg='black',
+                        highlightthickness=0, relief=FLAT, bg='black', fg='red',
                         command=lambda x=col, y=row: self.process(x, y))
                 rowList.append(button)
             self.grid.append(rowList)
@@ -85,6 +89,7 @@ class EnemyFrame(Frame):
             if len(self.desiredShots) < self.game.SHOTS_PER_TURN:
                 self.log.info("Recorded desired shot")
                 self.desiredShots.append([x,y])
+                self.grid[y][x].configure(image=self.SELECTED_IMG)
             
             if len(self.desiredShots) == 3:
                 # Send ready flag to game

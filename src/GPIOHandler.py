@@ -36,7 +36,6 @@ class GPIOHandler:
         # Define LED pins
         self.shotLEDs = [20, 21, 22]
         self.warnLights = 23
-        self.buttonIndicator = 19
         # Define button pins
         self.start   =  24
         self.reset   =  25
@@ -57,33 +56,26 @@ class GPIOHandler:
             sleep(0.1)
             if gpio.input(self.start) == gpio.HIGH:
                 self.startFlag = True
-                gpio.output(self.buttonIndicator, gpio.HIGH)
             else:
                 self.startFlag = False
-                gpio.output(self.buttonIndicator, gpio.LOW)
 
             if gpio.input(self.shoot) == gpio.HIGH:
                 self.shootFlag = True
-                gpio.output(self.buttonIndicator, gpio.HIGH)
             else:
                 self.shootFlag = False
-                gpio.output(self.buttonIndicator, gpio.LOW)
 
             if gpio.input(self.reset) == gpio.HIGH:
                 self.resetFlag = True
-                gpio.output(self.buttonIndicator, gpio.HIGH)
             else:
                 self.resetFlag = False
-                gpio.output(self.buttonIndicator, gpio.LOW)
                 
             if gpio.input(self.forfeit) == gpio.HIGH:
                 self.forfeitFlag = True
-                gpio.output(self.buttonIndicator, gpio.HIGH)
             else:
                 self.forfeitFlag = False
-                gpio.output(self.buttonIndicator, gpio.LOW)
 
         self.log.critical("Exit flag raised.")
+        self.__cleanup()
         sleep(0.25)
 
 
@@ -139,3 +131,13 @@ class GPIOHandler:
             self.lcd.lcd_clear()
         # Display string
         self.lcd.lcd_display_string(string, row)
+
+    def __cleanup(self):
+        self.log.info("Starting manual GPIO cleanup...")
+        self.lcd.lcd_clear()
+        self.log.info("Cleared LCD screen.")
+        gpio.output(self.warnLights, gpio.LOW)
+        for pin in self.shotLEDs:
+            gpio.output(self.pin, gpio.LOW)
+        self.log.info("Set LED pins to LOW.")
+        self.log.info("Finished manual GPIO cleanup...")

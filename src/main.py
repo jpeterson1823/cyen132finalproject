@@ -10,7 +10,7 @@ logging.info("Starting main script...")
 window = Tk()
 # Set full screen
 window.attributes('-fullscreen', True)
-window.configure(bg='black')
+window.configure(bg='black', cursor='none')
 #set title
 window.title("BATTLESHIP: PI EDITION")
 
