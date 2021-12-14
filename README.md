@@ -1,5 +1,6 @@
 # **BATTLESHIP [ RPi Edition ]**
 A CYEN/CSC 132 RPi Project
+Awarded "Most Aesthetic Award" on May 11, 2021
 
 Created by:
 * Lucas Duran
